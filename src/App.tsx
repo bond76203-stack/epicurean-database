@@ -890,10 +890,6 @@ const RecipeDetailScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const q = searchParams.get('q') || '検索';
-
-  const isAiGenerated = searchParams.get('ai') === 'true';
 
   const [dbRecipe, setDbRecipe] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
