@@ -993,13 +993,21 @@ const RecipeDetailScreen = () => {
                 <Trash2 size={20} />
               </button>
             )}
-            {!recipe.isExternal && (
+            {(!recipe.isExternal || recipe.isExternal === false) ? (
               <button 
                 onClick={() => navigate(`/recipes/edit/${recipe.id}`)} 
                 className="p-2.5 bg-black/40 backdrop-blur-md rounded-full text-white/90 hover:text-amber-400 hover:bg-black/60 transition-colors"
                 title="編集"
               >
                 <Edit2 size={20} />
+              </button>
+            ) : (
+              <button 
+                onClick={() => navigate('/recipes/new', { state: { importedRecipe: recipe } })} 
+                className="p-2.5 bg-amber-500/90 backdrop-blur-md rounded-full text-white hover:bg-amber-400 transition-colors shadow-[0_0_15px_rgba(245,158,11,0.5)]"
+                title="マイレシピに保存・編集"
+              >
+                <Save size={20} />
               </button>
             )}
             <button 
@@ -1175,6 +1183,7 @@ const RecipeDetailScreen = () => {
 // -------------------------------------------------------------
 const RecipeEditScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   // idがあれば「編集」、なければ「新規作成」扱い
   const { id } = useParams();
   const isEditing = Boolean(id);
@@ -1218,8 +1227,60 @@ const RecipeEditScreen = () => {
     { text: '', image: null }
   ]);
 
-  // マウント時に既存レシピデータを取得 (編集モード時)
+  // マウント時に既存レシピデータを取得 (編集モード時、またはAIからインポート時)
   useEffect(() => {
+    const passedRecipe = location.state?.importedRecipe;
+    if (passedRecipe) {
+        setTitle(passedRecipe.name || '');
+        if (passedRecipe.image) setRecipeImage(passedRecipe.image);
+        setCalories(String(passedRecipe.calories !== '-' ? passedRecipe.calories : 0));
+        setYieldAmount(String(Math.max(1, (passedRecipe.time || 20) / 10)));
+        
+        if (passedRecipe.tags) {
+           const lvl = passedRecipe.tags.find((t: string) => t.startsWith('level:'));
+           if (lvl) setLevel(lvl.replace('level:', ''));
+           setSelectedTags(passedRecipe.tags.filter((t: string) => !t.startsWith('level:') && t !== 'AI提案' && t !== '外部生成'));
+        }
+        
+        if (passedRecipe.ingredients && passedRecipe.ingredients.length > 0) {
+           setIngredients(passedRecipe.ingredients.map((ing: string) => {
+             if (ing.startsWith('■')) {
+               return { name: ing.replace(/^■\s*/, ''), quantity: '', unit: '', isGroupHeader: true };
+             }
+             
+             // Extract quantity and unit
+             const parts = ing.split(' ');
+             let q = '';
+             let u = '';
+             let n = ing;
+             if (parts.length > 1) {
+                const last = parts.pop() || '';
+                n = parts.join(' ');
+                const match = last.match(/^([\d\.\/]+)(.*)$/);
+                if (match) {
+                   q = match[1];
+                   u = match[2] || '';
+                } else {
+                   q = last;
+                }
+             }
+             return { name: n, quantity: q, unit: u || '個' }; // Fallback unit
+           }));
+        }
+        
+        if (passedRecipe.instructions && passedRecipe.instructions.length > 0) {
+           setInstructions(passedRecipe.instructions.map((inst: string) => {
+             try {
+               const p = JSON.parse(inst);
+               return { text: p.text || inst, image: p.image || null };
+             } catch(e) {
+               return { text: inst.replace(/^\d+\.\s*/, ''), image: null };
+             }
+           }));
+        }
+        return; // Skip normal DB fetch if we loaded from state
+    }
+
     if (isEditing && id) {
        if (id.length > 10) {
           supabase.from('recipes').select('*').eq('id', id).single().then(({ data }) => {
@@ -1298,6 +1359,18 @@ const RecipeEditScreen = () => {
     const newIngredients = [...ingredients];
     newIngredients[index][field] = value;
     setIngredients(newIngredients);
+  };
+
+  const moveIngredient = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === ingredients.length - 1) return;
+    
+    setIngredients(prev => {
+      const newArr = [...prev];
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      [newArr[index], newArr[targetIndex]] = [newArr[targetIndex], newArr[index]];
+      return newArr;
+    });
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -1714,7 +1787,11 @@ const RecipeEditScreen = () => {
           <div className="space-y-1.5">
             {ingredients.map((ing, i) => (
               <div key={`ing-${i}`} className={`flex items-center gap-1.5 ${ing.isGroupHeader ? 'mt-3 border-b border-amber-500/20 pb-1.5' : ''}`}>
-                <button onClick={() => handleRemoveIngredient(i)} className="text-zinc-600 hover:text-rose-500 transition-colors p-1 shrink-0"><X size={16} /></button>
+                <div className="flex flex-col shrink-0 px-0.5 bg-zinc-900/50 rounded-sm">
+                  <button type="button" onClick={() => moveIngredient(i, 'up')} disabled={i === 0} className="text-zinc-500 hover:text-white disabled:opacity-20 p-0.5 transition-colors"><ChevronUp size={12}/></button>
+                  <button type="button" onClick={() => moveIngredient(i, 'down')} disabled={i === ingredients.length - 1} className="text-zinc-500 hover:text-white disabled:opacity-20 p-0.5 transition-colors"><ChevronUp size={12} className="rotate-180"/></button>
+                </div>
+                <button type="button" onClick={() => handleRemoveIngredient(i)} className="text-zinc-600 hover:text-rose-500 transition-colors p-1 shrink-0"><X size={16} /></button>
                 
                 {ing.isGroupHeader ? (
                   <div className="flex-grow flex items-center relative">
