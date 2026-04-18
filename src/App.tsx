@@ -6,7 +6,7 @@ import {
   LayoutList, Grid2x2, Square,
   Globe, ArrowLeft, Heart, Share2, ChefHat,
   Camera, Save, X, Edit2, PlusCircle, Users, Link as LinkIcon, FileText, Filter, LogIn,
-  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp
+  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp, GripVertical
 } from 'lucide-react';
 
 import { supabase } from './lib/supabase';
@@ -1373,6 +1373,63 @@ const RecipeEditScreen = () => {
     });
   };
 
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    setDraggedItemIndex(index);
+    setTimeout(() => {
+      if (e.target instanceof HTMLElement) {
+        e.target.style.opacity = '0.5';
+      }
+    }, 0);
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    setDragOverItemIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if ('target' in e && e.target instanceof HTMLElement) {
+      e.target.style.opacity = '1';
+    }
+    if (draggedItemIndex !== null && dragOverItemIndex !== null && draggedItemIndex !== dragOverItemIndex) {
+      setIngredients(prev => {
+        const newArr = [...prev];
+        const item = newArr[draggedItemIndex];
+        newArr.splice(draggedItemIndex, 1);
+        newArr.splice(dragOverItemIndex, 0, item);
+        return newArr;
+      });
+    }
+    setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, index: number) => {
+    setDraggedItemIndex(index);
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    // スクロールを防止
+    // e.preventDefault(); // Note: cannot call preventDefault on passive touch move in React 19 easily, best handled via CSS touch-action: none
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    const itemDiv = targetElement?.closest('[data-index]');
+    if (itemDiv) {
+      const dropIndex = Number(itemDiv.getAttribute('data-index'));
+      setDragOverItemIndex(dropIndex);
+    }
+  };
+
   const handleRemoveIngredient = (index: number) => {
     if (ingredients.length === 1) return;
     const newIngredients = ingredients.filter((_, i) => i !== index);
@@ -1786,10 +1843,21 @@ const RecipeEditScreen = () => {
           </label>
           <div className="space-y-1.5">
             {ingredients.map((ing, i) => (
-              <div key={`ing-${i}`} className={`flex items-center gap-1.5 ${ing.isGroupHeader ? 'mt-3 border-b border-amber-500/20 pb-1.5' : ''}`}>
-                <div className="flex flex-col shrink-0 px-0.5 bg-zinc-900/50 rounded-sm">
-                  <button type="button" onClick={() => moveIngredient(i, 'up')} disabled={i === 0} className="text-zinc-500 hover:text-white disabled:opacity-20 p-0.5 transition-colors"><ChevronUp size={12}/></button>
-                  <button type="button" onClick={() => moveIngredient(i, 'down')} disabled={i === ingredients.length - 1} className="text-zinc-500 hover:text-white disabled:opacity-20 p-0.5 transition-colors"><ChevronUp size={12} className="rotate-180"/></button>
+              <div 
+                key={`ing-${i}`} 
+                data-index={i}
+                draggable
+                onDragStart={(e) => handleDragStart(e, i)}
+                onDragEnter={(e) => handleDragEnter(e, i)}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+                onTouchStart={(e) => handleTouchStart(e, i)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleDragEnd}
+                className={`flex items-center gap-1.5 transition-all outline-none ${dragOverItemIndex === i ? 'border-t-2 border-t-amber-500 pt-2 opacity-50' : ''} ${ing.isGroupHeader ? 'mt-3 border-b border-amber-500/20 pb-1.5' : ''}`}
+              >
+                <div className="flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing text-zinc-500 hover:text-white transition-colors bg-zinc-900/50 p-1.5 rounded-md touch-none">
+                  <GripVertical size={16} />
                 </div>
                 <button type="button" onClick={() => handleRemoveIngredient(i)} className="text-zinc-600 hover:text-rose-500 transition-colors p-1 shrink-0"><X size={16} /></button>
                 
