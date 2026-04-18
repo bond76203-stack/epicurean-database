@@ -180,20 +180,20 @@ const SearchScreen = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 pb-[100px] font-sans leading-snug selection:bg-amber-500/30">
+    <div className="flex flex-col h-[100dvh] overflow-y-auto bg-[#09090b] text-zinc-100 pb-[80px] font-sans leading-snug selection:bg-amber-500/30">
       {/* プレミアムな背景装飾 */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[40%] bg-rose-500/10 blur-[120px] rounded-full"></div>
         <div className="absolute top-[20%] right-[-20%] w-[60%] h-[50%] bg-amber-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-col justify-between h-full pt-6">
         {/* ロゴ部分 */}
-        <div className="pt-20 pb-8 flex flex-col justify-center items-center px-6">
+        <div className="pb-4 flex flex-col justify-center items-center px-6">
           <img 
             src="/logo.png" 
             alt="Epicurean Database Logo" 
-            className="w-48 md:w-56 h-auto object-contain drop-shadow-2xl"
+            className="w-40 md:w-48 h-auto object-contain drop-shadow-2xl"
             onError={(e) => {
               // ユーザーがまだ public/logo.png を用意していない場合のフォールバック
               e.currentTarget.style.display = 'none';
@@ -207,7 +207,7 @@ const SearchScreen = () => {
         </div>
 
         {/* 検索バー */}
-        <div className="px-6 mb-8 pt-4">
+        <div className="px-6 mb-4">
           <div className="relative flex items-center bg-zinc-900 shadow-xl border border-white/20 rounded-[2rem] p-0.5 max-w-sm mx-auto group">
             <div className="absolute inset-0 bg-emerald-500/10 rounded-[2rem] blur-md group-focus-within:bg-emerald-500/20 transition-all opacity-0 group-focus-within:opacity-100"></div>
             <div className="pl-5 pr-2 text-zinc-400 relative z-10">
@@ -227,8 +227,8 @@ const SearchScreen = () => {
         </div>
 
         {/* 人気の食材（シンプル表示） */}
-        <div className="px-5 mb-10 flex flex-col items-center justify-center">
-          <div className="flex flex-wrap gap-2.5 justify-center max-w-[340px] mb-5">
+        <div className="px-5 mb-2 flex flex-col items-center justify-center">
+          <div className="flex flex-wrap gap-2.5 justify-center max-w-[340px] mb-4">
              {POPULAR_INGREDIENTS.map(ing => (
                 <button
                   key={ing.name}
@@ -247,6 +247,7 @@ const SearchScreen = () => {
              {showAllCategories ? <ChevronUp size={16}/> : <Plus size={16}/>} 材料をもっと見る
           </button>
         </div>
+      </div>
 
         {/* 展開された全体のカテゴリー表 */}
         {showAllCategories && (
@@ -893,6 +894,7 @@ const RecipeDetailScreen = () => {
 
   const [dbRecipe, setDbRecipe] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [servings, setServings] = useState(2); // 出来上がり量（人数）
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -1056,9 +1058,22 @@ const RecipeDetailScreen = () => {
 
         {/* 材料リスト */}
         <div>
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Bookmark size={18} className="text-amber-500" /> 材料
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Bookmark size={18} className="text-amber-500" /> 材料
+            </h2>
+            <div className="flex items-center gap-2 bg-zinc-900 border border-white/10 rounded-full px-2 py-0.5">
+              <button 
+                onClick={() => setServings(s => Math.max(1, s - 1))}
+                className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
+              ><Minus size={14}/></button>
+              <span className="font-bold text-emerald-400 text-sm w-12 text-center">{servings}人分</span>
+              <button 
+                onClick={() => setServings(s => s + 1)}
+                className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
+              ><Plus size={14}/></button>
+            </div>
+          </div>
           <div className="space-y-0.5">
             {recipe.ingredients.map((ing: string, i: number) => {
               // グループ見出し（■から始まる）の場合
@@ -1074,8 +1089,35 @@ const RecipeDetailScreen = () => {
 
               const parts = ing.split(' ');
               // 数量・単位がスペース区切りになっていれば最後尾を取り出して右寄せにする
-              const quantity = parts.length > 1 ? parts.pop() : '';
+              let quantity = parts.length > 1 ? parts.pop() || '' : '';
               const name = parts.join(' ');
+              
+              // 数量の動的計算（分量変更時のみ）
+              if (servings !== 2 && quantity) {
+                const regex = /^([\d\.]+)(.*)$/;
+                const match = quantity.replace(/[０-９]/g, function (s) {
+                    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+                }).match(regex);
+
+                if (match) {
+                  const num = parseFloat(match[1]);
+                  const unit = match[2];
+                  if (!isNaN(num)) {
+                    const scaled = (num * servings) / 2; // デフォルトを2人分とする
+                    quantity = `${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${unit}`;
+                  }
+                } else if (quantity.includes('/')) {
+                   const fracMatch = quantity.match(/^(\d+)\/(\d+)(.*)$/);
+                   if (fracMatch) {
+                     const num = parseInt(fracMatch[1]);
+                     const den = parseInt(fracMatch[2]);
+                     const unit = fracMatch[3];
+                     const scaled = ((num/den) * servings) / 2;
+                     quantity = `${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${unit}`;
+                   }
+                }
+              }
+
               return (
                 <div key={i} className="flex justify-between items-center bg-zinc-900/20 py-0.5 px-2.5 rounded-lg border border-white/5">
                   <span className="text-zinc-300 font-medium text-[13px]">{name || ing}</span>
