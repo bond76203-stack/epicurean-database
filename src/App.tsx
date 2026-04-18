@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   Search, ScanLine, Compass, BookOpen, UserCircle, Settings2, Settings,
-  Flame, Clock, Plus, Bookmark, ChevronRight, Wand2, Loader2,
+  Flame, Clock, Plus, Minus, Bookmark, ChevronRight, Wand2, Loader2,
   LayoutList, Grid2x2, Square,
   Globe, ArrowLeft, Heart, Share2, ChefHat,
   Camera, Save, X, Edit2, PlusCircle, Users, Link as LinkIcon, FileText, Filter, LogIn,
