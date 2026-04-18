@@ -1361,17 +1361,6 @@ const RecipeEditScreen = () => {
     setIngredients(newIngredients);
   };
 
-  const moveIngredient = (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === ingredients.length - 1) return;
-    
-    setIngredients(prev => {
-      const newArr = [...prev];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      [newArr[index], newArr[targetIndex]] = [newArr[targetIndex], newArr[index]];
-      return newArr;
-    });
-  };
 
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
