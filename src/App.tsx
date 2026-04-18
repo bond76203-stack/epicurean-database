@@ -247,7 +247,6 @@ const SearchScreen = () => {
              {showAllCategories ? <ChevronUp size={16}/> : <Plus size={16}/>} 材料をもっと見る
           </button>
         </div>
-      </div>
 
         {/* 展開された全体のカテゴリー表 */}
         {showAllCategories && (
