@@ -1729,8 +1729,8 @@ const RecipeEditScreen = () => {
           </div>
 
           <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Yield / 出来上がり</label>
+            <div className="flex-1 min-w-0">
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 truncate">Yield / 出来上がり</label>
               <div className="flex gap-2">
                 <div className="relative flex-grow">
                   <Users size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/80" />
@@ -1755,9 +1755,9 @@ const RecipeEditScreen = () => {
           </div>
 
           <div className="flex gap-4">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span>Calories / 1人分(自動)</span>
+                <span className="truncate">Calories / 1人分</span>
                 {Number(calories) > 0 && <span className="text-[10px] text-amber-500 animate-pulse flex items-center gap-1"><Wand2 size={10} /> AI Calc</span>}
               </label>
               <div className="relative">
@@ -1771,8 +1771,8 @@ const RecipeEditScreen = () => {
                 />
               </div>
             </div>
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Time (m)</label>
+            <div className="flex-1 min-w-0">
+              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 truncate">Time (m)</label>
               <div className="relative">
                 <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input type="number" placeholder="15" className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner" />
@@ -1858,7 +1858,7 @@ const RecipeEditScreen = () => {
                       value={ing.name}
                       onChange={e => handleIngredientChange(i, 'name', e.target.value)}
                       placeholder="例: 【A】 合わせ調味料"
-                      className="flex-grow bg-transparent border-none text-amber-500 font-bold focus:outline-none placeholder-amber-500/30 text-sm py-1"
+                      className="flex-grow min-w-0 bg-transparent border-none text-amber-500 font-bold focus:outline-none placeholder-amber-500/30 text-sm py-1"
                     />
                   </div>
                 ) : (
@@ -1868,7 +1868,7 @@ const RecipeEditScreen = () => {
                       value={ing.name}
                       onChange={e => handleIngredientChange(i, 'name', e.target.value)}
                       placeholder="例: 牛肉"
-                      className="flex-grow bg-zinc-900/50 border border-white/10 rounded-lg px-2 py-1.5 text-sm text-zinc-200 focus:outline-none focus:border-amber-500"
+                      className="flex-grow min-w-0 bg-zinc-900/50 border border-white/10 rounded-lg px-2 py-1.5 text-sm text-zinc-200 focus:outline-none focus:border-amber-500"
                     />
                     <input
                       type="number"
