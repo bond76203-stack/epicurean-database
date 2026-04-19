@@ -187,9 +187,9 @@ const SearchScreen = () => {
         <div className="absolute top-[20%] right-[-20%] w-[60%] h-[50%] bg-amber-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="relative z-10 flex flex-col justify-between min-h-full pt-6">
+      <div className="relative z-10 flex flex-col min-h-full pt-6">
         {/* ロゴ部分 */}
-        <div className="pb-4 flex flex-col justify-center items-center px-6">
+        <div className="pb-4 flex flex-col justify-center items-center px-6 shrink-0">
           <img 
             src="/logo.png" 
             alt="Epicurean Database Logo" 
@@ -207,7 +207,7 @@ const SearchScreen = () => {
         </div>
 
         {/* 検索バー */}
-        <div className="px-6 mb-4">
+        <div className="px-6 mb-4 shrink-0">
           <div className="relative flex items-center bg-zinc-900 shadow-xl border border-white/20 rounded-[2rem] p-0.5 max-w-sm mx-auto group">
             <div className="absolute inset-0 bg-emerald-500/10 rounded-[2rem] blur-md group-focus-within:bg-emerald-500/20 transition-all opacity-0 group-focus-within:opacity-100"></div>
             <div className="pl-5 pr-2 text-zinc-400 relative z-10">
@@ -227,7 +227,7 @@ const SearchScreen = () => {
         </div>
 
         {/* 人気の食材（シンプル表示） */}
-        <div className="px-5 mb-2 flex flex-col items-center justify-center">
+        <div className="px-5 mb-2 flex flex-col items-center justify-center shrink-0">
           <div className="flex flex-wrap gap-2.5 justify-center max-w-[340px] mb-4">
              {POPULAR_INGREDIENTS.map(ing => (
                 <button
@@ -250,7 +250,7 @@ const SearchScreen = () => {
 
         {/* 展開された全体のカテゴリー表 */}
         {showAllCategories && (
-          <div className="mb-10 w-full overflow-hidden flex flex-col items-center border-t border-white/5 pt-6 bg-zinc-900/30">
+          <div className="mb-10 w-full overflow-hidden flex flex-col items-center border-t border-white/5 pt-6 bg-zinc-900/30 shrink-0">
             <div className="w-full overflow-x-auto invisible-scrollbar px-5 pb-4">
               <div className="flex gap-2.5">
                 {ITEM_CATEGORIES.map((cat: any) => (
@@ -293,7 +293,7 @@ const SearchScreen = () => {
         )}
 
         {/* アクションボタン */}
-        <div className="px-6 space-y-4 max-w-sm mx-auto">
+        <div className="px-6 space-y-4 max-w-sm w-full mx-auto mt-auto shrink-0 pb-6">
           <button
             disabled={!searchQuery.trim()}
             onClick={handleSearch}
