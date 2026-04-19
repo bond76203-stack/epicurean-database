@@ -187,7 +187,7 @@ const SearchScreen = () => {
         <div className="absolute top-[20%] right-[-20%] w-[60%] h-[50%] bg-amber-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="relative z-10 flex flex-col justify-between h-full pt-6">
+      <div className="relative z-10 flex flex-col justify-between min-h-full pt-6">
         {/* ロゴ部分 */}
         <div className="pb-4 flex flex-col justify-center items-center px-6">
           <img 
