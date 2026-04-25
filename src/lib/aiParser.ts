@@ -238,7 +238,7 @@ ${ingredients.join('\n') || "材料なし"}
 
     try {
         return JSON.parse(resultText);
-    } catch(e) {
+    } catch {
         throw new Error('AIが回答したデータ形式が不正でした。');
     }
 }

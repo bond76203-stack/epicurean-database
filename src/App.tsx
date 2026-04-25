@@ -6,7 +6,7 @@ import {
   LayoutList, Grid2x2, Square,
   Globe, ArrowLeft, Heart, Share2, ChefHat,
   Camera, Save, X, Edit2, PlusCircle, Users, Link as LinkIcon, FileText, Filter, LogIn,
-  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp, GripVertical, Activity, PieChart
+  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp, GripVertical, Activity
 } from 'lucide-react';
 
 import { supabase } from './lib/supabase';
