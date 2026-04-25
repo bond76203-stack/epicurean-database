@@ -158,7 +158,7 @@ ${isAiInspiration
     }
 }
 
-export async function calculateCaloriesWithGemini(apiKey: string, ingredients: {name: string, quantity: string, unit: string}[]) {
+export async function calculateCaloriesWithGemini(apiKey: string, ingredients: {name: string, quantity: string, unit: string, isGroupHeader?: boolean}[]) {
     const ingredientList = ingredients
       .filter(i => !i.isGroupHeader && i.name)
       .map(i => `${i.name} ${i.quantity}${i.unit}`)
