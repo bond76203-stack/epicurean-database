@@ -6,11 +6,11 @@ import {
   LayoutList, Grid2x2, Square,
   Globe, ArrowLeft, Heart, Share2, ChefHat,
   Camera, Save, X, Edit2, PlusCircle, Users, Link as LinkIcon, FileText, Filter, LogIn,
-  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp, GripVertical
+  Moon, Sun, Tag, FolderPlus, List, Trash2, Scale, KeyRound, LogOut, ChevronUp, GripVertical, Activity, PieChart
 } from 'lucide-react';
 
 import { supabase } from './lib/supabase';
-import { parseRecipeWithGemini, generateRecipeIdeasWithGemini } from './lib/aiParser';
+import { parseRecipeWithGemini, generateRecipeIdeasWithGemini, calculateCaloriesWithGemini, analyzeNutritionWithGemini } from './lib/aiParser';
 import { getSettings, saveSettings, DEFAULT_INGREDIENTS, DEFAULT_GENRES, DEFAULT_TAGS, DEFAULT_UNITS } from './lib/settingsHelper';
 
 const FALLBACK_IMAGES = [
@@ -894,6 +894,8 @@ const RecipeDetailScreen = () => {
   const [dbRecipe, setDbRecipe] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [servings, setServings] = useState(2); // 出来上がり量（人数）
+  const [nutrition, setNutrition] = useState<{protein: string, fat: string, carbs: string, salt: string, suggestions: string} | null>(null);
+  const [isAnalyzingNutrition, setIsAnalyzingNutrition] = useState(false);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -969,6 +971,26 @@ const RecipeDetailScreen = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let recipe: any = location.state?.generatedRecipe || dbRecipe || RECIPES_DATA.find(r => String(r.id) === id);
 
+  const handleAnalyzeNutrition = async () => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      alert("⚠️ 【APIキーが必要です】\\nAI解析を行うには、.env.local に VITE_GEMINI_API_KEY を設定してください。");
+      return;
+    }
+    setIsAnalyzingNutrition(true);
+    try {
+      if (!recipe?.ingredients || recipe.ingredients.length === 0) {
+        throw new Error("材料が登録されていません。");
+      }
+      const data = await analyzeNutritionWithGemini(apiKey, recipe.ingredients, servings);
+      setNutrition(data);
+    } catch (e: any) {
+      alert(e.message || "栄養素解析に失敗しました");
+    } finally {
+      setIsAnalyzingNutrition(false);
+    }
+  };
+
   if (!recipe) return <div className="p-10 text-center text-white">Recipe not found</div>;
 
   return (
@@ -1042,25 +1064,68 @@ const RecipeDetailScreen = () => {
 
       {/* 詳細情報エリア */}
       <div className="px-5 pt-6 space-y-5">
-        {/* ステータスバー */}
-        <div className="flex justify-around items-center bg-zinc-900/60 border border-white/5 rounded-2xl py-4 shadow-lg backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-1">
+        {/* ステータスバー（シンプル化） */}
+        <div className="flex items-center gap-6 text-zinc-300 mb-6 px-1">
+          <div className="flex items-center gap-2">
             <Flame size={20} className="text-amber-500" />
-            <span className="text-xl font-bold">{recipe.calories}</span>
-            <span className="text-[10px] text-zinc-500 uppercase">kcal</span>
+            <span className="font-bold text-lg">{recipe.calories} <span className="text-xs font-normal text-zinc-500">kcal</span></span>
           </div>
-          <div className="w-[1px] h-10 bg-white/10"></div>
-          <div className="flex flex-col items-center gap-1">
-            <Clock size={20} className="text-zinc-300" />
-            <span className="text-xl font-bold">{recipe.time}</span>
-            <span className="text-[10px] text-zinc-500 uppercase">min</span>
+          <div className="flex items-center gap-2">
+            <Clock size={20} />
+            <span className="font-bold text-lg">{recipe.time} <span className="text-xs font-normal text-zinc-500">min</span></span>
           </div>
-          <div className="w-[1px] h-10 bg-white/10"></div>
-          <div className="flex flex-col items-center gap-1">
-            <ChefHat size={20} className="text-emerald-500" />
-            <span className="text-xl font-bold">{recipe.tags?.find((t: string) => t.startsWith('level:'))?.replace('level:', '') || 'Novice'}</span>
-            <span className="text-[10px] text-zinc-500 uppercase">level</span>
+        </div>
+
+        {/* 栄養情報分析 */}
+        <div className="bg-zinc-900/40 border border-emerald-500/20 rounded-2xl p-4 shadow-inner">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-sm text-emerald-400 flex items-center gap-2">
+              <Activity size={16} /> 栄養バランス分析（{servings}人分）
+            </h3>
+            {!nutrition && (
+              <button
+                onClick={handleAnalyzeNutrition}
+                disabled={isAnalyzingNutrition}
+                className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isAnalyzingNutrition ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                AIで解析
+              </button>
+            )}
           </div>
+          
+          {nutrition ? (
+            <div className="space-y-3 animate-in fade-in zoom-in duration-500">
+              <div className="grid grid-cols-4 gap-2 text-center pt-2">
+                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
+                  <div className="text-[10px] text-zinc-500 mb-1">タンパク質</div>
+                  <div className="font-bold text-amber-500">{nutrition.protein}</div>
+                </div>
+                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
+                  <div className="text-[10px] text-zinc-500 mb-1">脂質</div>
+                  <div className="font-bold text-rose-400">{nutrition.fat}</div>
+                </div>
+                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
+                  <div className="text-[10px] text-zinc-500 mb-1">炭水化物</div>
+                  <div className="font-bold text-sky-400">{nutrition.carbs}</div>
+                </div>
+                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
+                  <div className="text-[10px] text-zinc-500 mb-1">食塩相当</div>
+                  <div className="font-bold text-zinc-300">{nutrition.salt}</div>
+                </div>
+              </div>
+              {nutrition.suggestions && (
+                <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 flex gap-2">
+                  <div className="shrink-0 pt-0.5"><Wand2 size={14} className="text-emerald-500" /></div>
+                  <p className="text-xs text-zinc-300 leading-relaxed">{nutrition.suggestions}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-500">
+              ボタンを押すと、このレシピの材料からAIが自動で栄養素を推定して表示します！
+            </p>
+          )}
         </div>
 
         {/* 材料リスト */}
@@ -1488,48 +1553,34 @@ const RecipeEditScreen = () => {
     setInstructions(newInstructions);
   };
 
-  // 100gあたりのカロリー目安データベース (超簡易モック)
-  const CALORIE_DB: Record<string, number> = {
-    '牛肉': 300, '豚肉': 290, '鶏肉': 200, '卵': 150,
-    'じゃがいも': 76, 'にんじん': 35, '玉ねぎ': 40, 'トマト': 18,
-    'キャベツ': 23, 'チーズ': 350, 'バター': 745, '小麦粉': 368,
-    '砂糖': 384, '牛乳': 67, 'オリーブオイル': 900, 'パン': 260
-  };
+  const [isCalculatingCalories, setIsCalculatingCalories] = useState(false);
 
-  // 材料が変わるたびにカロリーを自動計算！
-  useEffect(() => {
-    let totalKcal = 0;
-    ingredients.forEach(ing => {
-      // データベースから一致する材料を探す（部分一致でもOKにする）
-      const dbMatch = Object.keys(CALORIE_DB).find(dbName => ing.name.includes(dbName));
-      const kcalPer100g = dbMatch ? CALORIE_DB[dbMatch] : 0;
-      const qty = Number(ing.quantity) || 0;
-
-      if (['g', 'ml', 'cc'].includes(ing.unit)) {
-        // g, ml なら 100gあたりの倍率で計算
-        totalKcal += (kcalPer100g * qty) / 100;
-      } else if (['個', '本', '枚'].includes(ing.unit)) {
-        // 個などは1つあたりざっくり50gとして計算
-        totalKcal += (kcalPer100g * qty * 0.5);
-      } else if (['大さじ', '小さじ'].includes(ing.unit)) {
-        // 大さじ15g、小さじ5g
-        const weight = ing.unit === '大さじ' ? 15 : 5;
-        totalKcal += (kcalPer100g * qty * weight) / 100;
-      }
-    });
-
-    // 出来上がり人数で割って「1人分」にする
-    const persons = Number(yieldAmount) || 1;
-    const finalKcal = Math.round(totalKcal / persons);
-
-    // 計算結果が0より大きければ更新を反映 (0のままなら上書きしない)
-    if (finalKcal > 0) {
-      setCalories(String(finalKcal));
-    } else if (totalKcal === 0 && ingredients.every(i => !i.name)) {
-      setCalories('0'); // 全部空になったら0に戻す
+  const handleAutoCalculateCalories = async () => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      alert("⚠️ 【APIキーが必要です】\n実際のAI解析を行うには、.env.local に VITE_GEMINI_API_KEY を設定してください。");
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ingredients, yieldAmount]);
+    if (ingredients.filter(i => !i.isGroupHeader && i.name).length === 0) {
+      alert("材料を入力してからAI計算をお試しください");
+      return;
+    }
+    
+    setIsCalculatingCalories(true);
+    try {
+      const totalKcal = await calculateCaloriesWithGemini(apiKey, ingredients);
+      // 出来上がり人数で割って「1人分」にする
+      const persons = Number(yieldAmount) || 1;
+      const finalKcal = Math.round(totalKcal / persons);
+      
+      setCalories(String(finalKcal > 0 ? finalKcal : 0));
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "カロリー計算に失敗しました");
+    } finally {
+      setIsCalculatingCalories(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -1758,17 +1809,27 @@ const RecipeEditScreen = () => {
             <div className="flex-1 min-w-0">
               <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span className="truncate">Calories / 1人分</span>
-                {Number(calories) > 0 && <span className="text-[10px] text-amber-500 animate-pulse flex items-center gap-1"><Wand2 size={10} /> AI Calc</span>}
               </label>
-              <div className="relative">
-                <Flame size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 ${Number(calories) > 0 ? 'text-amber-500' : 'text-amber-500/50'}`} />
-                <input
-                  type="number"
-                  value={calories}
-                  onChange={e => setCalories(e.target.value)}
-                  placeholder="0"
-                  className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
-                />
+              <div className="relative flex gap-2">
+                <div className="relative flex-grow">
+                  <Flame size={16} className={`absolute left-4 top-1/2 -translate-y-1/2 ${Number(calories) > 0 ? 'text-amber-500' : 'text-amber-500/50'}`} />
+                  <input
+                    type="number"
+                    value={calories}
+                    onChange={e => setCalories(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAutoCalculateCalories}
+                  disabled={isCalculatingCalories}
+                  className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-500 border border-amber-500/30 rounded-xl px-2 flex items-center justify-center transition-colors disabled:opacity-50 shrink-0 text-xs font-bold"
+                  title="AIでカロリー自動計算"
+                >
+                  {isCalculatingCalories ? <Loader2 size={16} className="animate-spin" /> : <><Wand2 size={14} className="mr-1" /> AI</>}
+                </button>
               </div>
             </div>
             <div className="flex-1 min-w-0">

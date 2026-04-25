@@ -157,3 +157,88 @@ ${isAiInspiration
         throw new Error('AIが回答したデータ形式が不正でした。');
     }
 }
+
+export async function calculateCaloriesWithGemini(apiKey: string, ingredients: {name: string, quantity: string, unit: string}[]) {
+    const ingredientList = ingredients
+      .filter(i => !i.isGroupHeader && i.name)
+      .map(i => `${i.name} ${i.quantity}${i.unit}`)
+      .join('\n');
+
+    const prompt = `
+以下の材料リストから、全体での合計カロリー（kcal）を推定し、数値のみ（例: 450）を返してください。
+文章での返答は一切不要です。数値が推測できない場合は 0 を返してください。
+
+【材料リスト】
+${ingredientList || "材料なし"}
+`;
+
+    const payload = {
+      contents: [{
+        parts: [{ text: prompt }]
+      }]
+    };
+
+    const res = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=\${apiKey}\`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        throw new Error('カロリー計算に失敗しました');
+    }
+
+    const jsonData = await res.json();
+    const resultText = jsonData.candidates[0].content.parts[0].text;
+    
+    // 数値だけを抽出
+    const match = resultText.match(/\d+/);
+    if (match) {
+        return parseInt(match[0], 10);
+    }
+    return 0;
+}
+
+export async function analyzeNutritionWithGemini(apiKey: string, ingredients: string[], servings: number) {
+    const prompt = `
+以下の材料リストから、${servings}人分で作った場合の【1人分あたり】の詳細な栄養素を推定し、JSON形式で返答してください。
+文章での返答は一切含めず、純粋なJSONのみを出力してください。
+
+【必須出力JSONフォーマット】
+{
+  "protein": "◯◯g",
+  "fat": "◯◯g",
+  "carbs": "◯◯g",
+  "salt": "◯◯g",
+  "suggestions": "（栄養バランスに関するAIからの短いアドバイス。1文程度）"
+}
+
+【材料リスト(${servings}人分)】
+${ingredients.join('\n') || "材料なし"}
+`;
+
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" }
+    };
+
+    const res = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=\${apiKey}\`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        throw new Error('栄養素解析に失敗しました');
+    }
+
+    const jsonData = await res.json();
+    let resultText = jsonData.candidates[0].content.parts[0].text;
+    resultText = resultText.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim();
+
+    try {
+        return JSON.parse(resultText);
+    } catch(e) {
+        throw new Error('AIが回答したデータ形式が不正でした。');
+    }
+}
