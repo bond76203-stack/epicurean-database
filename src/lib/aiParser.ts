@@ -178,7 +178,7 @@ ${ingredientList || "材料なし"}
       }]
     };
 
-    const res = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=\${apiKey}\`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -234,7 +234,7 @@ ${ingredients.join('\n') || "材料なし"}
 
     const jsonData = await res.json();
     let resultText = jsonData.candidates[0].content.parts[0].text;
-    resultText = resultText.replace(/\`\`\`json\n?/g, '').replace(/\`\`\`\n?/g, '').trim();
+    resultText = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     try {
         return JSON.parse(resultText);
