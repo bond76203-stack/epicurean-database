@@ -984,7 +984,8 @@ const RecipeDetailScreen = () => {
       }
       const data = await analyzeNutritionWithGemini(apiKey, recipe.ingredients, servings);
       setNutrition(data);
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as Error;
       alert(e.message || "栄養素解析に失敗しました");
     } finally {
       setIsAnalyzingNutrition(false);
@@ -1574,7 +1575,8 @@ const RecipeEditScreen = () => {
       const finalKcal = Math.round(totalKcal / persons);
       
       setCalories(String(finalKcal > 0 ? finalKcal : 0));
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as Error;
       console.error(e);
       alert(e.message || "カロリー計算に失敗しました");
     } finally {
@@ -1622,7 +1624,8 @@ const RecipeEditScreen = () => {
       }
       
       navigate('/recipes');
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as Error;
       console.error(e);
       alert('保存に失敗しました: ' + e.message);
     }
@@ -1643,6 +1646,7 @@ const RecipeEditScreen = () => {
       
       if (parsedData.title) setTitle(parsedData.title);
       if (parsedData.ingredients && Array.isArray(parsedData.ingredients)) {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
          setIngredients(parsedData.ingredients.map((ing: any) => ({
             name: ing.name || '不明な材料',
             quantity: String(ing.quantity || ''),
@@ -1658,7 +1662,8 @@ const RecipeEditScreen = () => {
       setIsImportModalOpen(false);
       setImportText('');
       setImportFile(null);
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as Error;
       console.error(e);
       alert(e.message || "AI解析に失敗しました...");
     } finally {
@@ -2227,7 +2232,8 @@ const LoginScreen = () => {
         alert('登録が完了しました！');
         navigate('/profile');
       }
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as Error;
       setErrorMsg(error.message);
     } finally {
       setLoading(false);
