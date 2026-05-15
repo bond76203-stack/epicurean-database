@@ -14,6 +14,11 @@ CREATE TABLE IF NOT EXISTS public.favorites (
 
 ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
 
+-- 2024/2025年以降のSupabase仕様変更に対応するため、Data APIへのアクセス権限を明示的に付与
+GRANT SELECT ON public.favorites TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.favorites TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.favorites TO service_role;
+
 CREATE POLICY "Users can manage their own favorites" 
   ON public.favorites 
   FOR ALL 
