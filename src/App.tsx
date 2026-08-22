@@ -2677,29 +2677,34 @@ const SettingsScreen = () => {
     setEditingItem({ id, title, items: defaultItems.slice() });
   };
 
+  const updateAndSaveSettings = (id: string, newItems: string[]) => {
+    saveSettings(id, newItems);
+    if (id === 'ingredients') setIngredients(newItems);
+    if (id === 'genres') setGenres(newItems);
+    if (id === 'tags') setTags(newItems);
+    if (id === 'units') setUnits(newItems);
+  };
+
   const handleAddItem = () => {
     if (newItemText.trim() && editingItem) {
-      setEditingItem({ ...editingItem, items: [...editingItem.items, newItemText.trim()] });
+      const updated = [...editingItem.items, newItemText.trim()];
+      setEditingItem({ ...editingItem, items: updated });
+      updateAndSaveSettings(editingItem.id, updated);
       setNewItemText('');
     }
   };
 
   const handleDeleteItem = (idx: number) => {
     if (editingItem) {
-      const newItems = editingItem.items.filter((_, i) => i !== idx);
-      setEditingItem({ ...editingItem, items: newItems });
+      const updated = editingItem.items.filter((_, i) => i !== idx);
+      setEditingItem({ ...editingItem, items: updated });
+      updateAndSaveSettings(editingItem.id, updated);
     }
   };
 
   const handleSaveItems = () => {
     if (!editingItem) return;
-    saveSettings(editingItem.id, editingItem.items);
-    if (editingItem.id === 'ingredients') setIngredients(editingItem.items);
-    if (editingItem.id === 'genres') setGenres(editingItem.items);
-    if (editingItem.id === 'tags') setTags(editingItem.items);
-    if (editingItem.id === 'units') setUnits(editingItem.items);
-    
-    alert(`${editingItem.title}の設定をデバイスに保存しました！`);
+    updateAndSaveSettings(editingItem.id, editingItem.items);
     setEditingItem(null);
   };
 
@@ -2747,46 +2752,101 @@ const SettingsScreen = () => {
         <div>
           <h2 className={`text-xs font-bold uppercase tracking-wider mb-4 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-500'}`}>データ管理</h2>
           <div className={`rounded-2xl border overflow-hidden ${theme === 'dark' ? 'bg-zinc-900/60 border-white/5' : 'bg-white border-black/5 shadow-sm'}`}>
-            <button onClick={() => handleEdit('ingredients', '食材の追加・削除', ingredients)} className={`w-full flex items-center justify-between p-4 py-4 border-b transition-all ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800 active:bg-zinc-800/80' : 'border-black/5 hover:bg-gray-50'}`}>
-              <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-emerald-100 text-emerald-600'}`}><List size={20} /></div>
-                <div className="text-left w-full overflow-hidden">
+            <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800/50' : 'border-black/5 hover:bg-gray-50'}`}>
+              <button onClick={() => handleEdit('ingredients', '食材の追加・削除', ingredients)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-emerald-100 text-emerald-600'}`}><List size={20} /></div>
                   <span className={`block font-bold text-sm tracking-wide ${theme === 'dark' ? 'text-zinc-200' : 'text-gray-700'}`}>よく使う食材</span>
-                  <span className={`block text-[10px] mt-1 pr-4 line-clamp-1 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>{ingredients.join('、') || '未登録'}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-amber-500 font-bold">編集</span>
+                  <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
+                </div>
+              </button>
+              <div className="mt-3 overflow-x-auto invisible-scrollbar flex gap-1.5 pb-1">
+                {ingredients.length === 0 ? (
+                  <span className={`text-xs ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>未登録</span>
+                ) : (
+                  ingredients.map((item: string, i: number) => (
+                    <span key={i} className={`inline-block whitespace-nowrap text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${theme === 'dark' ? 'bg-zinc-800 text-zinc-300 border border-white/5' : 'bg-gray-100 text-gray-700 border border-black/5'}`}>
+                      {item}
+                    </span>
+                  ))
+                )}
               </div>
-              <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
-            </button>
-            <button onClick={() => handleEdit('genres', 'カテゴリの追加・削除', genres)} className={`w-full flex items-center justify-between p-4 py-4 border-b transition-all ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800 active:bg-zinc-800/80' : 'border-black/5 hover:bg-gray-50'}`}>
-              <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-blue-500/10 text-blue-500' : 'bg-blue-100 text-blue-600'}`}><FolderPlus size={20} /></div>
-                <div className="text-left w-full overflow-hidden">
+            </div>
+
+            <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800/50' : 'border-black/5 hover:bg-gray-50'}`}>
+              <button onClick={() => handleEdit('genres', 'カテゴリの追加・削除', genres)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-blue-500/10 text-blue-500' : 'bg-blue-100 text-blue-600'}`}><FolderPlus size={20} /></div>
                   <span className={`block font-bold text-sm tracking-wide ${theme === 'dark' ? 'text-zinc-200' : 'text-gray-700'}`}>カテゴリの管理</span>
-                  <span className={`block text-[10px] mt-1 pr-4 line-clamp-1 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>{genres.join('、') || '未登録'}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-amber-500 font-bold">編集</span>
+                  <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
+                </div>
+              </button>
+              <div className="mt-3 overflow-x-auto invisible-scrollbar flex gap-1.5 pb-1">
+                {genres.length === 0 ? (
+                  <span className={`text-xs ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>未登録</span>
+                ) : (
+                  genres.map((item: string, i: number) => (
+                    <span key={i} className={`inline-block whitespace-nowrap text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${theme === 'dark' ? 'bg-zinc-800 text-zinc-300 border border-white/5' : 'bg-gray-100 text-gray-700 border border-black/5'}`}>
+                      {item}
+                    </span>
+                  ))
+                )}
               </div>
-              <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
-            </button>
-            <button onClick={() => handleEdit('tags', 'タグの追加・削除', tags)} className={`w-full flex items-center justify-between p-4 py-4 border-b transition-all ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800 active:bg-zinc-800/80' : 'border-black/5 hover:bg-gray-50'}`}>
-              <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-purple-500/10 text-purple-500' : 'bg-purple-100 text-purple-600'}`}><Tag size={20} /></div>
-                <div className="text-left w-full overflow-hidden">
+            </div>
+
+            <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5 hover:bg-zinc-800/50' : 'border-black/5 hover:bg-gray-50'}`}>
+              <button onClick={() => handleEdit('tags', 'タグの追加・削除', tags)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-purple-500/10 text-purple-500' : 'bg-purple-100 text-purple-600'}`}><Tag size={20} /></div>
                   <span className={`block font-bold text-sm tracking-wide ${theme === 'dark' ? 'text-zinc-200' : 'text-gray-700'}`}>タグの管理</span>
-                  <span className={`block text-[10px] mt-1 pr-4 line-clamp-1 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>{tags.join('、') || '未登録'}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-amber-500 font-bold">編集</span>
+                  <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
+                </div>
+              </button>
+              <div className="mt-3 overflow-x-auto invisible-scrollbar flex gap-1.5 pb-1">
+                {tags.length === 0 ? (
+                  <span className={`text-xs ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>未登録</span>
+                ) : (
+                  tags.map((item: string, i: number) => (
+                    <span key={i} className={`inline-block whitespace-nowrap text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${theme === 'dark' ? 'bg-zinc-800 text-zinc-300 border border-white/5' : 'bg-gray-100 text-gray-700 border border-black/5'}`}>
+                      {item}
+                    </span>
+                  ))
+                )}
               </div>
-              <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
-            </button>
-            <button onClick={() => handleEdit('units', '単位の追加・削除', units)} className={`w-full flex items-center justify-between p-4 py-4 transition-all ${theme === 'dark' ? 'hover:bg-zinc-800 active:bg-zinc-800/80' : 'hover:bg-gray-50'}`}>
-              <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-orange-500/10 text-orange-500' : 'bg-orange-100 text-orange-600'}`}><Scale size={20} /></div>
-                <div className="text-left w-full overflow-hidden">
+            </div>
+
+            <div className={`p-4 ${theme === 'dark' ? 'hover:bg-zinc-800/50' : 'hover:bg-gray-50'}`}>
+              <button onClick={() => handleEdit('units', '単位の追加・削除', units)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl shadow-sm ${theme === 'dark' ? 'bg-orange-500/10 text-orange-500' : 'bg-orange-100 text-orange-600'}`}><Scale size={20} /></div>
                   <span className={`block font-bold text-sm tracking-wide ${theme === 'dark' ? 'text-zinc-200' : 'text-gray-700'}`}>単位の管理</span>
-                  <span className={`block text-[10px] mt-1 pr-4 line-clamp-1 ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>{units.join('、') || '未登録'}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-amber-500 font-bold">編集</span>
+                  <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
+                </div>
+              </button>
+              <div className="mt-3 overflow-x-auto invisible-scrollbar flex gap-1.5 pb-1">
+                {units.length === 0 ? (
+                  <span className={`text-xs ${theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'}`}>未登録</span>
+                ) : (
+                  units.map((item: string, i: number) => (
+                    <span key={i} className={`inline-block whitespace-nowrap text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${theme === 'dark' ? 'bg-zinc-800 text-zinc-300 border border-white/5' : 'bg-gray-100 text-gray-700 border border-black/5'}`}>
+                      {item}
+                    </span>
+                  ))
+                )}
               </div>
-              <ChevronRight size={18} className={theme === 'dark' ? 'text-zinc-500' : 'text-gray-400'} />
-            </button>
+            </div>
           </div>
         </div>
 
