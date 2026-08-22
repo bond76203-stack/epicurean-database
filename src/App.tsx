@@ -894,6 +894,8 @@ const RecipeDetailScreen = () => {
   const [dbRecipe, setDbRecipe] = useState<any>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [servings, setServings] = useState(2); // 出来上がり量（人数）
+  const [servingsUnit, setServingsUnit] = useState('人分');
+  const [originalServings, setOriginalServings] = useState(2);
   const [nutrition, setNutrition] = useState<{protein: string, fat: string, carbs: string, salt: string, suggestions: string} | null>(null);
   const [isAnalyzingNutrition, setIsAnalyzingNutrition] = useState(false);
 
@@ -970,6 +972,29 @@ const RecipeDetailScreen = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let recipe: any = location.state?.generatedRecipe || dbRecipe || RECIPES_DATA.find(r => String(r.id) === id);
+
+  useEffect(() => {
+    if (recipe) {
+      let amount = 2;
+      let unit = '人分';
+      if (recipe.tags) {
+        const yieldTag = recipe.tags.find((t: string) => t.startsWith('yield:'));
+        if (yieldTag) {
+          const parts = yieldTag.split(':');
+          if (parts.length >= 3) {
+            amount = Number(parts[1]) || 2;
+            unit = parts[2] || '人分';
+          }
+        } else {
+          // 古いデータのフォールバック
+          amount = Math.max(1, (recipe.time || 20) / 10);
+        }
+      }
+      setOriginalServings(amount);
+      setServings(amount);
+      setServingsUnit(unit);
+    }
+  }, [recipe]);
 
   const handleAnalyzeNutrition = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -1140,7 +1165,7 @@ const RecipeDetailScreen = () => {
                 onClick={() => setServings(s => Math.max(1, s - 1))}
                 className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
               ><Minus size={14}/></button>
-              <span className="font-bold text-emerald-400 text-sm w-12 text-center">{servings}人分</span>
+              <span className="font-bold text-emerald-400 text-sm w-12 text-center">{servings}{servingsUnit}</span>
               <button 
                 onClick={() => setServings(s => s + 1)}
                 className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
@@ -1165,8 +1190,8 @@ const RecipeDetailScreen = () => {
               let quantity = parts.length > 1 ? parts.pop() || '' : '';
               const name = parts.join(' ');
               
-              // 数量の動的計算（分量変更時のみ）
-              if (servings !== 2 && quantity) {
+              // 数量の動的計算（表示人数が元の出来上がり量と異なる場合）
+              if (servings !== originalServings && quantity) {
                 const regex = /^([\d\.]+)(.*)$/;
                 const match = quantity.replace(/[０-９]/g, function (s) {
                     return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
@@ -1176,7 +1201,7 @@ const RecipeDetailScreen = () => {
                   const num = parseFloat(match[1]);
                   const unit = match[2];
                   if (!isNaN(num)) {
-                    const scaled = (num * servings) / 2; // デフォルトを2人分とする
+                    const scaled = (num * servings) / originalServings;
                     quantity = `${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${unit}`;
                   }
                 } else if (quantity.includes('/')) {
@@ -1185,7 +1210,7 @@ const RecipeDetailScreen = () => {
                      const num = parseInt(fracMatch[1]);
                      const den = parseInt(fracMatch[2]);
                      const unit = fracMatch[3];
-                     const scaled = ((num/den) * servings) / 2;
+                     const scaled = ((num/den) * servings) / originalServings;
                      quantity = `${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${unit}`;
                    }
                 }
@@ -1258,6 +1283,7 @@ const RecipeEditScreen = () => {
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
   const [yieldAmount, setYieldAmount] = useState('2');
   const [yieldUnit, setYieldUnit] = useState('人分');
+  const [cookingTime, setCookingTime] = useState('20');
   const [calories, setCalories] = useState('0'); // カロリーのStateを追加
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -1300,7 +1326,24 @@ const RecipeEditScreen = () => {
         setTitle(passedRecipe.name || '');
         if (passedRecipe.image) setRecipeImage(passedRecipe.image);
         setCalories(String(passedRecipe.calories !== '-' ? passedRecipe.calories : 0));
-        setYieldAmount(String(Math.max(1, (passedRecipe.time || 20) / 10)));
+        
+        let amount = '2';
+        let unit = '人分';
+        if (passedRecipe.tags) {
+           const yieldTag = passedRecipe.tags.find((t: string) => t.startsWith('yield:'));
+           if (yieldTag) {
+              const parts = yieldTag.split(':');
+              if (parts.length >= 3) {
+                 amount = parts[1] || '2';
+                 unit = parts[2] || '人分';
+              }
+           } else {
+              amount = String(Math.max(1, (passedRecipe.time || 20) / 10));
+           }
+        }
+        setYieldAmount(amount);
+        setYieldUnit(unit);
+        setCookingTime(String(passedRecipe.time || 20));
         
         if (passedRecipe.tags) {
            const lvl = passedRecipe.tags.find((t: string) => t.startsWith('level:'));
@@ -1354,11 +1397,29 @@ const RecipeEditScreen = () => {
                 setTitle(data.name);
                 if (data.image) setRecipeImage(data.image);
                 setCalories(String(data.calories || 0));
-                setYieldAmount(String(Math.max(1, (data.time || 20) / 10)));
+                
+                let amount = '2';
+                let unit = '人分';
+                if (data.tags) {
+                   const yieldTag = data.tags.find((t: string) => t.startsWith('yield:'));
+                   if (yieldTag) {
+                      const parts = yieldTag.split(':');
+                      if (parts.length >= 3) {
+                         amount = parts[1] || '2';
+                         unit = parts[2] || '人分';
+                      }
+                   } else {
+                      amount = String(Math.max(1, (data.time || 20) / 10));
+                   }
+                }
+                setYieldAmount(amount);
+                setYieldUnit(unit);
+                setCookingTime(String(data.time || 20));
+                
                 if (data.tags) {
                    const lvl = data.tags.find((t: string) => t.startsWith('level:'));
                    if (lvl) setLevel(lvl.replace('level:', ''));
-                   setSelectedTags(data.tags.filter((t: string) => !t.startsWith('level:')));
+                   setSelectedTags(data.tags.filter((t: string) => !t.startsWith('level:') && !t.startsWith('yield:')));
                 }
                 if (data.ingredients) {
                    setIngredients(data.ingredients.map((ing: string) => {
@@ -1387,9 +1448,27 @@ const RecipeEditScreen = () => {
              setTitle(mock.name);
              if (mock.image) setRecipeImage(mock.image);
              setCalories(String(mock.calories));
+             let amount = '2';
+             let unit = '人分';
+             if (mock.tags) {
+                const yieldTag = mock.tags.find((t: string) => t.startsWith('yield:'));
+                if (yieldTag) {
+                   const parts = yieldTag.split(':');
+                   if (parts.length >= 3) {
+                      amount = parts[1] || '2';
+                      unit = parts[2] || '人分';
+                   }
+                } else {
+                   amount = String(Math.max(1, (mock.time || 20) / 10));
+                }
+             }
+             setYieldAmount(amount);
+             setYieldUnit(unit);
+             setCookingTime(String(mock.time || 20));
+
              const lvl = mock.tags.find((t: string) => t.startsWith('level:'));
              if (lvl) setLevel(lvl.replace('level:', ''));
-             setSelectedTags(mock.tags.filter((t: string) => !t.startsWith('level:')));
+             setSelectedTags(mock.tags.filter((t: string) => !t.startsWith('level:') && !t.startsWith('yield:')));
              setIngredients(mock.ingredients.map((ing: string) => {
                 if (ing.startsWith('■')) {
                   return { name: ing.replace(/^■\s*/, ''), quantity: '', unit: '', isGroupHeader: true };
@@ -1597,12 +1676,13 @@ const RecipeEditScreen = () => {
     }
 
     try {
+      const cleanTags = selectedTags.filter(t => !t.startsWith('level:') && !t.startsWith('yield:'));
       const recipeToSave = {
         user_id: session.user.id,
         name: title,
         calories: Number(calories) || 0,
-        time: Number(yieldAmount) * 10,
-        tags: [...selectedTags, `level:${level}`],
+        time: Number(cookingTime) || 20,
+        tags: [...cleanTags, `level:${level}`, `yield:${yieldAmount}:${yieldUnit}`],
         ingredients: ingredients.map(ing => 
           ing.isGroupHeader ? `■ ${ing.name}` : `${ing.name} ${ing.quantity}${ing.unit}`.trim()
         ),
@@ -1841,7 +1921,13 @@ const RecipeEditScreen = () => {
               <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 truncate">Time (m)</label>
               <div className="relative">
                 <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-                <input type="number" placeholder="15" className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner" />
+                <input
+                  type="number"
+                  value={cookingTime}
+                  onChange={e => setCookingTime(e.target.value)}
+                  placeholder="15"
+                  className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
+                />
               </div>
             </div>
           </div>
