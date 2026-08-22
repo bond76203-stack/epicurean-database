@@ -12,6 +12,7 @@ import {
 import { supabase } from './lib/supabase';
 import { parseRecipeWithGemini, generateRecipeIdeasWithGemini, calculateCaloriesWithGemini, analyzeNutritionWithGemini } from './lib/aiParser';
 import { getSettings, saveSettings, DEFAULT_INGREDIENTS, DEFAULT_GENRES, DEFAULT_TAGS, DEFAULT_UNITS } from './lib/settingsHelper';
+import { useTheme } from './context/ThemeContext';
 
 const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1544025162-8316c0b31e13?auto=format&fit=crop&q=80&w=400&h=400',
@@ -180,7 +181,7 @@ const SearchScreen = () => {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-y-auto bg-[#09090b] text-zinc-100 pb-[80px] font-sans leading-snug selection:bg-amber-500/30">
+    <div className="flex flex-col h-[100dvh] overflow-y-auto bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 pb-[80px] font-sans leading-snug selection:bg-amber-500/30 transition-colors duration-300">
       {/* プレミアムな背景装飾 */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[40%] bg-rose-500/10 blur-[120px] rounded-full"></div>
@@ -200,7 +201,7 @@ const SearchScreen = () => {
               e.currentTarget.nextElementSibling?.classList.remove('hidden');
             }}
           />
-          <h1 className="hidden text-3xl font-black tracking-tight text-white text-center">
+          <h1 className="hidden text-3xl font-black tracking-tight text-gray-900 dark:text-white text-center">
             EPICUREAN<br />
             <span className="text-xl tracking-[0.3em] font-medium text-amber-500">DATABASE</span>
           </h1>
@@ -208,9 +209,9 @@ const SearchScreen = () => {
 
         {/* 検索バー */}
         <div className="px-6 mb-4 shrink-0">
-          <div className="relative flex items-center bg-zinc-900 shadow-xl border border-white/20 rounded-[2rem] p-0.5 max-w-sm mx-auto group">
+          <div className="relative flex items-center bg-white dark:bg-zinc-900 shadow-xl border border-gray-200 dark:border-white/20 rounded-[2rem] p-0.5 max-w-sm mx-auto group transition-colors">
             <div className="absolute inset-0 bg-emerald-500/10 rounded-[2rem] blur-md group-focus-within:bg-emerald-500/20 transition-all opacity-0 group-focus-within:opacity-100"></div>
-            <div className="pl-5 pr-2 text-zinc-400 relative z-10">
+            <div className="pl-5 pr-2 text-gray-400 dark:text-zinc-400 relative z-10">
               <Search size={20} />
             </div>
             <input
@@ -221,7 +222,7 @@ const SearchScreen = () => {
                 if (e.key === 'Enter') handleSearch();
               }}
               placeholder="何で検索しますか？"
-              className="w-full py-4 bg-transparent text-zinc-100 placeholder-zinc-500 font-bold focus:outline-none relative z-10"
+              className="w-full py-4 bg-transparent text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 font-bold focus:outline-none relative z-10"
             />
           </div>
         </div>
@@ -233,7 +234,7 @@ const SearchScreen = () => {
                 <button
                   key={ing.name}
                   onClick={() => toggleIngredient(ing.name)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center transition-all shadow-md active:scale-95 ${searchQuery.includes(ing.name) ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-800'}`}
+                  className={`px-5 py-2.5 rounded-full text-sm font-bold flex items-center transition-all shadow-md active:scale-95 ${searchQuery.includes(ing.name) ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-zinc-100 text-gray-800 dark:text-zinc-800 border border-gray-200 dark:border-transparent'}`}
                 >
                    {ing.name}
                 </button>
@@ -242,7 +243,7 @@ const SearchScreen = () => {
           
           <button 
             onClick={() => setShowAllCategories(!showAllCategories)}
-            className="px-6 py-2.5 rounded-full border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 rounded-full border border-emerald-500/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
           >
              {showAllCategories ? <ChevronUp size={16}/> : <Plus size={16}/>} 材料をもっと見る
           </button>
@@ -250,14 +251,14 @@ const SearchScreen = () => {
 
         {/* 展開された全体のカテゴリー表 */}
         {showAllCategories && (
-          <div className="mb-10 w-full overflow-hidden flex flex-col items-center border-t border-white/5 pt-6 bg-zinc-900/30 shrink-0">
+          <div className="mb-10 w-full overflow-hidden flex flex-col items-center border-t border-gray-200 dark:border-white/5 pt-6 bg-gray-100/60 dark:bg-zinc-900/30 shrink-0">
             <div className="w-full overflow-x-auto invisible-scrollbar px-5 pb-4">
               <div className="flex gap-2.5">
                 {ITEM_CATEGORIES.map((cat: any) => (
                   <button
                     key={cat.category}
                     onClick={() => setActiveCategory(cat.category)}
-                    className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-md active:scale-95 ${activeCategory === cat.category ? 'bg-emerald-600 text-white border border-emerald-500' : 'bg-zinc-800/80 text-zinc-400 border border-white/5 hover:border-emerald-500/30 hover:text-zinc-200'}`}
+                    className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-md active:scale-95 ${activeCategory === cat.category ? 'bg-emerald-600 text-white border border-emerald-500' : 'bg-white dark:bg-zinc-800/80 text-gray-700 dark:text-zinc-400 border border-gray-200 dark:border-white/5 hover:border-emerald-500/30 hover:text-gray-900 dark:hover:text-zinc-200'}`}
                   >
                     {cat.category}
                   </button>
@@ -267,8 +268,8 @@ const SearchScreen = () => {
 
             <div className="px-5 w-full flex flex-col gap-4 mt-2 mb-4 animate-in fade-in slide-in-from-top-4">
               {ITEM_CATEGORIES.find((c: any) => c.category === activeCategory)?.sections.map((sec: any) => (
-                <div key={sec.label} className="bg-zinc-900 pb-2 border-b border-white/5 last:border-0">
-                  <h3 className="text-xs font-bold text-emerald-500 mb-3 ml-1 tracking-widest">{sec.label}</h3>
+                <div key={sec.label} className="bg-white dark:bg-zinc-900 p-3 rounded-2xl border border-gray-200 dark:border-white/5">
+                  <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-500 mb-3 ml-1 tracking-widest">{sec.label}</h3>
                   <div className="flex flex-wrap gap-2">
                     {sec.items.map((ing: string) => {
                       const isSelected = searchQuery.includes(ing);
@@ -278,7 +279,7 @@ const SearchScreen = () => {
                           onClick={() => toggleIngredient(ing)}
                           className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 active:scale-95 border ${isSelected
                               ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg'
-                              : 'bg-zinc-800/50 border-white/5 text-zinc-300 hover:bg-zinc-800 hover:border-emerald-500/30'
+                              : 'bg-gray-100 dark:bg-zinc-800/50 border-gray-200 dark:border-white/5 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800 hover:border-emerald-500/30'
                             }`}
                         >
                           {ing}
@@ -297,7 +298,7 @@ const SearchScreen = () => {
           <button
             disabled={!searchQuery.trim()}
             onClick={handleSearch}
-            className="w-full bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold py-4 rounded-full shadow-lg active:scale-95 transition-all flex items-center justify-center text-lg gap-2"
+            className="w-full bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 disabled:bg-gray-300 dark:disabled:bg-zinc-800 disabled:text-gray-400 dark:disabled:text-zinc-500 text-white font-bold py-4 rounded-full shadow-lg active:scale-95 transition-all flex items-center justify-center text-lg gap-2"
           >
             検索
           </button>
@@ -308,14 +309,14 @@ const SearchScreen = () => {
             className="w-full bg-transparent border border-emerald-500 relative rounded-full p-[2px] group transition-all active:scale-95"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-amber-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity"></div>
-            <div className="relative bg-[#09090b] rounded-full py-4 flex items-center justify-center gap-2">
+            <div className="relative bg-white dark:bg-[#09090b] rounded-full py-4 flex items-center justify-center gap-2 transition-colors">
               {isGenerating ? (
                 <>
                   <Loader2 className="animate-spin text-amber-500" size={20} />
-                  <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-500">考案中...</span>
+                  <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-amber-600 dark:from-emerald-400 dark:to-amber-500">考案中...</span>
                 </>
               ) : (
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-amber-500 text-lg">AIで生成</span>
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-amber-600 dark:from-emerald-400 dark:to-amber-500 text-lg">AIで生成</span>
               )}
             </div>
           </button>
@@ -500,7 +501,7 @@ const RecipeListScreen = () => {
         <div
           key={recipe.id}
           onClick={handleCardClick}
-          className={`group bg-zinc-900/40 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-white/5'} rounded-3xl overflow-hidden hover:bg-zinc-800/60 transition-all duration-500 flex flex-col cursor-pointer`}
+          className={`group bg-white dark:bg-zinc-900/40 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-black/5 dark:border-white/5'} rounded-3xl overflow-hidden hover:bg-gray-100 dark:hover:bg-zinc-800/60 transition-all duration-500 flex flex-col cursor-pointer shadow-sm dark:shadow-none`}
         >
           <div className="relative h-48 overflow-hidden">
             <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
@@ -517,13 +518,13 @@ const RecipeListScreen = () => {
               <h3 className="font-bold text-xl text-white leading-tight drop-shadow-lg">{recipe.name}</h3>
             </div>
           </div>
-          <div className="px-4 py-4 flex justify-between items-center bg-gradient-to-b from-zinc-900/50 to-zinc-900/90">
+          <div className="px-4 py-4 flex justify-between items-center bg-gray-50 dark:bg-gradient-to-b dark:from-zinc-900/50 dark:to-zinc-900/90 border-t border-black/5 dark:border-white/5">
             <div className="flex gap-4">
-              {recipe.calories !== '-' && <span className="text-xs font-medium text-zinc-400 flex items-center gap-1.5"><Flame size={14} className="text-amber-500/70" /> {recipe.calories} kcal</span>}
-              <span className="text-xs font-medium text-zinc-400 flex items-center gap-1.5"><Clock size={14} className="text-zinc-500" /> {recipe.time} min</span>
-              {recipe.isExternal && <span className="text-xs font-medium text-rose-400 flex items-center gap-1"><Globe size={14} />アプリ内で見る</span>}
+              {recipe.calories !== '-' && <span className="text-xs font-medium text-gray-600 dark:text-zinc-400 flex items-center gap-1.5"><Flame size={14} className="text-amber-500/70" /> {recipe.calories} kcal</span>}
+              <span className="text-xs font-medium text-gray-600 dark:text-zinc-400 flex items-center gap-1.5"><Clock size={14} className="text-gray-400 dark:text-zinc-500" /> {recipe.time} min</span>
+              {recipe.isExternal && <span className="text-xs font-medium text-rose-500 dark:text-rose-400 flex items-center gap-1"><Globe size={14} />アプリ内で見る</span>}
             </div>
-            <ChevronRight size={18} className="text-zinc-600 group-hover:text-amber-400 transition-colors" />
+            <ChevronRight size={18} className="text-gray-400 dark:text-zinc-600 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
           </div>
         </div>
       );
@@ -537,7 +538,7 @@ const RecipeListScreen = () => {
         <div
           key={recipe.id}
           onClick={handleCardClick}
-          className={`group bg-zinc-900/40 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-white/5'} rounded-2xl overflow-hidden hover:bg-zinc-800/60 transition-all flex flex-col cursor-pointer`}
+          className={`group bg-white dark:bg-zinc-900/40 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-black/5 dark:border-white/5'} rounded-2xl overflow-hidden hover:bg-gray-100 dark:hover:bg-zinc-800/60 transition-all flex flex-col cursor-pointer shadow-sm dark:shadow-none`}
         >
           <div className="relative aspect-square overflow-hidden">
             <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -552,10 +553,10 @@ const RecipeListScreen = () => {
             )}
           </div>
           <div className="p-3 flex flex-col flex-grow">
-            <h3 className="font-bold text-sm text-zinc-100 leading-snug line-clamp-2 mb-2">{recipe.name}</h3>
+            <h3 className="font-bold text-sm text-gray-900 dark:text-zinc-100 leading-snug line-clamp-2 mb-2">{recipe.name}</h3>
             <div className="mt-auto flex flex-col gap-1.5">
-              {recipe.calories !== '-' && <span className="text-[10px] font-medium text-amber-500/80 flex items-center gap-1"><Flame size={10} /> {recipe.calories} kcal</span>}
-              <span className="text-[10px] font-medium text-zinc-500 flex items-center gap-1"><Clock size={10} /> {recipe.time} min</span>
+              {recipe.calories !== '-' && <span className="text-[10px] font-medium text-amber-600 dark:text-amber-500/80 flex items-center gap-1"><Flame size={10} /> {recipe.calories} kcal</span>}
+              <span className="text-[10px] font-medium text-gray-500 dark:text-zinc-500 flex items-center gap-1"><Clock size={10} /> {recipe.time} min</span>
             </div>
           </div>
         </div>
@@ -569,7 +570,7 @@ const RecipeListScreen = () => {
       <div
         key={recipe.id}
         onClick={handleCardClick}
-        className={`group bg-zinc-900/30 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-white/5'} rounded-2xl flex items-center p-2.5 gap-4 hover:bg-zinc-800/50 transition-all cursor-pointer`}
+        className={`group bg-white dark:bg-zinc-900/30 border ${recipe.isExternal ? 'border-amber-500/30' : 'border-black/5 dark:border-white/5'} rounded-2xl flex items-center p-2.5 gap-4 hover:bg-gray-100 dark:hover:bg-zinc-800/50 transition-all cursor-pointer shadow-sm dark:shadow-none`}
       >
         <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 relative">
           <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -581,15 +582,15 @@ const RecipeListScreen = () => {
         </div>
         <div className="flex-grow py-1">
           <div className="flex gap-2 mb-1.5">
-            <span className={`text-[9px] font-bold ${recipe.isExternal ? 'text-rose-200 bg-rose-900' : 'text-amber-200/80 bg-zinc-800'} px-1.5 py-0.5 rounded-sm`}>{recipe.tags[0]}</span>
+            <span className={`text-[9px] font-bold ${recipe.isExternal ? 'text-rose-200 bg-rose-900' : 'text-amber-700 dark:text-amber-200/80 bg-amber-100 dark:bg-zinc-800'} px-1.5 py-0.5 rounded-sm`}>{recipe.tags[0]}</span>
           </div>
-          <h3 className="font-bold text-sm text-zinc-100 mb-1 leading-snug truncate">{recipe.name}</h3>
+          <h3 className="font-bold text-sm text-gray-900 dark:text-zinc-100 mb-1 leading-snug truncate">{recipe.name}</h3>
           <div className="flex gap-3">
-            {recipe.calories !== '-' && <span className="text-[10px] text-zinc-500 flex items-center gap-1"><Flame size={10} className="text-amber-500/50" />{recipe.calories}cal</span>}
-            <span className="text-[10px] text-zinc-500 flex items-center gap-1"><Clock size={10} />{recipe.time}m</span>
+            {recipe.calories !== '-' && <span className="text-[10px] text-gray-500 dark:text-zinc-500 flex items-center gap-1"><Flame size={10} className="text-amber-500/50" />{recipe.calories}cal</span>}
+            <span className="text-[10px] text-gray-500 dark:text-zinc-500 flex items-center gap-1"><Clock size={10} />{recipe.time}m</span>
           </div>
         </div>
-        <button className="p-2 text-zinc-600 hover:text-amber-400 mr-1">
+        <button className="p-2 text-gray-400 dark:text-zinc-600 hover:text-amber-500 dark:hover:text-amber-400 mr-1">
           {recipe.isExternal ? <Globe size={16} /> : <ChevronRight size={16} />}
         </button>
       </div>
@@ -597,30 +598,30 @@ const RecipeListScreen = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 pb-[120px] relative font-sans leading-snug">
-      <div className="fixed top-0 w-full max-w-md h-64 bg-gradient-to-b from-zinc-900 to-transparent pointer-events-none z-0"></div>
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 pb-[120px] relative font-sans leading-snug transition-colors duration-300">
+      <div className="fixed top-0 w-full max-w-md h-64 bg-gradient-to-b from-gray-200/50 dark:from-zinc-900 to-transparent pointer-events-none z-0"></div>
 
       <div className="relative z-10">
         {/* ヘッダー */}
-        <div className="px-5 pt-12 pb-4 flex justify-between items-center sticky top-0 bg-[#09090b]/90 backdrop-blur-xl border-b border-white/5 z-20">
+        <div className="px-5 pt-12 pb-4 flex justify-between items-center sticky top-0 bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-xl border-b border-black/5 dark:border-white/5 z-20">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Curation</h1>
-            <p className="text-xs text-zinc-500 mt-1">{q ? '検索結果' : '保存されたレシピ'}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Curation</h1>
+            <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1">{q ? '検索結果' : '保存されたレシピ'}</p>
           </div>
           <button
             onClick={() => setIsFilterModalOpen(true)}
-            className="p-2.5 bg-zinc-800/80 rounded-full border border-white/10 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-all active:scale-95 relative"
+            className="p-2.5 bg-gray-100 dark:bg-zinc-800/80 rounded-full border border-black/5 dark:border-white/10 text-gray-700 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all active:scale-95 relative"
             title="詳細設定・絞り込み"
           >
-            {activeFilter !== 'all' && <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-zinc-900 border-box"></div>}
+            {activeFilter !== 'all' && <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white dark:border-zinc-900 border-box"></div>}
             <Settings2 size={20} />
           </button>
         </div>
 
         {/* レシピ一覧画面内の検索バー */}
         <div className="px-5 pt-3">
-          <div className="relative flex items-center bg-zinc-900/60 border border-white/10 rounded-2xl p-1 shadow-inner">
-            <div className="pl-4 pr-2 text-zinc-500">
+          <div className="relative flex items-center bg-white dark:bg-zinc-900/60 border border-black/5 dark:border-white/10 rounded-2xl p-1 shadow-sm dark:shadow-inner">
+            <div className="pl-4 pr-2 text-gray-400 dark:text-zinc-500">
               <Search size={18} />
             </div>
             <input
@@ -630,10 +631,10 @@ const RecipeListScreen = () => {
                 if (e.key === 'Enter') navigate(`/recipes?q=${encodeURIComponent((e.target as HTMLInputElement).value)}`);
               }}
               placeholder="レシピ名、材料、タグでさらに検索..."
-              className="w-full py-3 bg-transparent text-zinc-100 placeholder-zinc-600 focus:outline-none text-sm"
+              className="w-full py-3 bg-transparent text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-600 focus:outline-none text-sm"
             />
             {q && (
-              <button onClick={() => navigate('/recipes')} className="p-2 text-zinc-500 hover:text-white mr-1 transition-colors">
+              <button onClick={() => navigate('/recipes')} className="p-2 text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white mr-1 transition-colors">
                 <X size={16} />
               </button>
             )}
@@ -642,27 +643,27 @@ const RecipeListScreen = () => {
 
         {/* 表示切り替え（ビュートグル） */}
         <div className="px-5 pt-6 pb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-zinc-400">
-            {isAiGenerated ? <span className="text-amber-400 flex items-center gap-1.5"><Wand2 size={14}/>AIからの提案</span> : q ? `「${q}」の検索結果` : 'All Recipes'}
+          <h2 className="text-sm font-medium text-gray-500 dark:text-zinc-400">
+            {isAiGenerated ? <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5"><Wand2 size={14}/>AIからの提案</span> : q ? `「${q}」の検索結果` : 'All Recipes'}
           </h2>
-          <div className="flex bg-zinc-900/80 backdrop-blur-md p-1 rounded-xl border border-white/5 shadow-2xl">
+          <div className="flex bg-gray-200/80 dark:bg-zinc-900/80 backdrop-blur-md p-1 rounded-xl border border-black/5 dark:border-white/5 shadow-sm dark:shadow-2xl">
             <button
               onClick={() => setViewMode('single')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'single' ? 'bg-zinc-700 text-amber-400 shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'single' ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-md' : 'text-gray-500 dark:text-zinc-500 hover:text-gray-800 dark:hover:text-zinc-300'}`}
               title="1列表示"
             >
               <Square size={18} />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-zinc-700 text-amber-400 shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-md' : 'text-gray-500 dark:text-zinc-500 hover:text-gray-800 dark:hover:text-zinc-300'}`}
               title="2列グリッド表示"
             >
               <Grid2x2 size={18} />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-zinc-700 text-amber-400 shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-zinc-700 text-amber-600 dark:text-amber-400 shadow-md' : 'text-gray-500 dark:text-zinc-500 hover:text-gray-800 dark:hover:text-zinc-300'}`}
               title="リスト表示"
             >
               <LayoutList size={18} />
@@ -709,12 +710,12 @@ const RecipeListScreen = () => {
             </div>
 
             {/* 外部サイトへのディープリンク部分 */}
-            <div className="pt-4 border-t border-white/5">
-              <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2 mb-4">
+            <div className="pt-4 border-t border-gray-200 dark:border-white/5">
+              <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-4">
                 <Globe size={18} />
                 大手サイトで「{q}」を直接検索
               </h3>
-              <p className="text-xs text-zinc-500 mb-4">
+              <p className="text-xs text-gray-500 dark:text-zinc-500 mb-4">
                 以下のサイトで見つけたレシピは、作成画面の「マジックインポート」でURLを貼り付けるとAIが自動入力して取り込めます。
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -722,46 +723,46 @@ const RecipeListScreen = () => {
                   href={`https://cookpad.com/search/${encodeURIComponent(q)}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="bg-zinc-800/80 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors"
+                  className="bg-white dark:bg-zinc-800/80 border border-black/5 dark:border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors shadow-sm dark:shadow-none"
                 >
-                  <span className="font-bold text-sm text-zinc-300 group-hover:text-emerald-400">クックパッド</span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-emerald-400" />
+                  <span className="font-bold text-sm text-gray-800 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">クックパッド</span>
+                  <ChevronRight size={16} className="text-gray-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                 </a>
                 <a 
                   href={`https://www.kurashiru.com/search?query=${encodeURIComponent(q)}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="bg-zinc-800/80 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors"
+                  className="bg-white dark:bg-zinc-800/80 border border-black/5 dark:border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors shadow-sm dark:shadow-none"
                 >
-                  <span className="font-bold text-sm text-zinc-300 group-hover:text-emerald-400">クラシル</span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-emerald-400" />
+                  <span className="font-bold text-sm text-gray-800 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">クラシル</span>
+                  <ChevronRight size={16} className="text-gray-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                 </a>
                 <a 
                   href={`https://oceans-nadia.com/search?q=${encodeURIComponent(q)}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="bg-zinc-800/80 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors"
+                  className="bg-white dark:bg-zinc-800/80 border border-black/5 dark:border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors shadow-sm dark:shadow-none"
                 >
-                  <span className="font-bold text-sm text-zinc-300 group-hover:text-emerald-400">Nadia</span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-emerald-400" />
+                  <span className="font-bold text-sm text-gray-800 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">Nadia</span>
+                  <ChevronRight size={16} className="text-gray-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                 </a>
                 <a 
                   href={`https://recipe.rakuten.co.jp/search/${encodeURIComponent(q)}/`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="bg-zinc-800/80 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors"
+                  className="bg-white dark:bg-zinc-800/80 border border-black/5 dark:border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors shadow-sm dark:shadow-none"
                 >
-                  <span className="font-bold text-sm text-zinc-300 group-hover:text-emerald-400">楽天レシピ</span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-emerald-400" />
+                  <span className="font-bold text-sm text-gray-800 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">楽天レシピ</span>
+                  <ChevronRight size={16} className="text-gray-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                 </a>
                 <a 
                   href={`https://delishkitchen.tv/search?q=${encodeURIComponent(q)}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="col-span-2 bg-zinc-800/80 border border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors"
+                  className="col-span-2 bg-white dark:bg-zinc-800/80 border border-black/5 dark:border-white/10 hover:border-emerald-500/50 p-3 rounded-xl flex items-center justify-between group transition-colors shadow-sm dark:shadow-none"
                 >
-                  <span className="font-bold text-sm text-zinc-300 group-hover:text-emerald-400">デリッシュキッチン</span>
-                  <ChevronRight size={16} className="text-zinc-500 group-hover:text-emerald-400" />
+                  <span className="font-bold text-sm text-gray-800 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">デリッシュキッチン</span>
+                  <ChevronRight size={16} className="text-gray-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
                 </a>
               </div>
             </div>
@@ -782,7 +783,7 @@ const RecipeListScreen = () => {
       {/* 詳細絞り込み・ソートモーダル */}
       {isFilterModalOpen && (
         <div className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-zinc-900 border-t border-white/10 w-full max-w-md mx-auto rounded-t-3xl p-6 shadow-2xl relative translate-y-0 animate-in slide-in-from-bottom-full duration-300 pb-28">
+          <div className="bg-white dark:bg-zinc-900 border-t border-black/10 dark:border-white/10 w-full max-w-md mx-auto rounded-t-3xl p-6 shadow-2xl relative translate-y-0 animate-in slide-in-from-bottom-full duration-300 pb-28 text-gray-900 dark:text-white">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Filter size={18} className="text-amber-500" />
@@ -1020,11 +1021,11 @@ const RecipeDetailScreen = () => {
   if (!recipe) return <div className="p-10 text-center text-white">Recipe not found</div>;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 font-sans leading-snug pb-[100px]">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans leading-snug pb-[100px] transition-colors duration-300">
       {/* ヒーロー画像エリア */}
       <div className="relative h-80 w-full">
         <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/40 to-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-gray-50/40 dark:from-[#09090b] dark:via-[#09090b]/40 to-black/60"></div>
 
         {/* ナビゲーションバー (バックボタンなど) */}
         <div className="absolute top-0 w-full px-5 pt-12 flex justify-between items-center z-10">
@@ -1079,40 +1080,40 @@ const RecipeDetailScreen = () => {
         <div className="absolute bottom-6 left-5 right-5 z-10">
           <div className="flex gap-2 mb-3">
             {recipe.tags?.filter((tag: string) => !tag.startsWith('level:')).map((tag: string) => (
-              <span key={tag} className="text-xs font-bold uppercase text-amber-200 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-sm">
+              <span key={tag} className="text-xs font-bold uppercase text-amber-600 dark:text-amber-200 bg-amber-500/20 dark:bg-amber-500/10 border border-amber-500/30 dark:border-amber-500/20 px-2 py-1 rounded-sm backdrop-blur-md">
                 {tag}
               </span>
             ))}
           </div>
-          <h1 className="text-3xl font-extrabold text-white leading-tight drop-shadow-2xl">{recipe.name}</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white leading-tight drop-shadow-2xl">{recipe.name}</h1>
         </div>
       </div>
 
       {/* 詳細情報エリア */}
       <div className="px-5 pt-6 space-y-5">
         {/* ステータスバー（シンプル化） */}
-        <div className="flex items-center gap-6 text-zinc-300 mb-6 px-1">
+        <div className="flex items-center gap-6 text-gray-700 dark:text-zinc-300 mb-6 px-1">
           <div className="flex items-center gap-2">
             <Flame size={20} className="text-amber-500" />
-            <span className="font-bold text-lg">{recipe.calories} <span className="text-xs font-normal text-zinc-500">kcal</span></span>
+            <span className="font-bold text-lg">{recipe.calories} <span className="text-xs font-normal text-gray-500 dark:text-zinc-500">kcal</span></span>
           </div>
           <div className="flex items-center gap-2">
             <Clock size={20} />
-            <span className="font-bold text-lg">{recipe.time} <span className="text-xs font-normal text-zinc-500">min</span></span>
+            <span className="font-bold text-lg">{recipe.time} <span className="text-xs font-normal text-gray-500 dark:text-zinc-500">min</span></span>
           </div>
         </div>
 
         {/* 栄養情報分析 */}
-        <div className="bg-zinc-900/40 border border-emerald-500/20 rounded-2xl p-4 shadow-inner">
+        <div className="bg-white dark:bg-zinc-900/40 border border-emerald-500/20 rounded-2xl p-4 shadow-sm dark:shadow-inner">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-bold text-sm text-emerald-400 flex items-center gap-2">
+            <h3 className="font-bold text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
               <Activity size={16} /> 栄養バランス分析（{servings}人分）
             </h3>
             {!nutrition && (
               <button
                 onClick={handleAnalyzeNutrition}
                 disabled={isAnalyzingNutrition}
-                className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-colors disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isAnalyzingNutrition ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
                 AIで解析
@@ -1123,32 +1124,32 @@ const RecipeDetailScreen = () => {
           {nutrition ? (
             <div className="space-y-3 animate-in fade-in zoom-in duration-500">
               <div className="grid grid-cols-4 gap-2 text-center pt-2">
-                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
-                  <div className="text-[10px] text-zinc-500 mb-1">タンパク質</div>
-                  <div className="font-bold text-amber-500">{nutrition.protein}</div>
+                <div className="bg-gray-50 dark:bg-zinc-950/50 rounded-xl p-2 border border-black/5 dark:border-white/5">
+                  <div className="text-[10px] text-gray-500 dark:text-zinc-500 mb-1">タンパク質</div>
+                  <div className="font-bold text-amber-600 dark:text-amber-500">{nutrition.protein}</div>
                 </div>
-                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
-                  <div className="text-[10px] text-zinc-500 mb-1">脂質</div>
-                  <div className="font-bold text-rose-400">{nutrition.fat}</div>
+                <div className="bg-gray-50 dark:bg-zinc-950/50 rounded-xl p-2 border border-black/5 dark:border-white/5">
+                  <div className="text-[10px] text-gray-500 dark:text-zinc-500 mb-1">脂質</div>
+                  <div className="font-bold text-rose-600 dark:text-rose-400">{nutrition.fat}</div>
                 </div>
-                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
-                  <div className="text-[10px] text-zinc-500 mb-1">炭水化物</div>
-                  <div className="font-bold text-sky-400">{nutrition.carbs}</div>
+                <div className="bg-gray-50 dark:bg-zinc-950/50 rounded-xl p-2 border border-black/5 dark:border-white/5">
+                  <div className="text-[10px] text-gray-500 dark:text-zinc-500 mb-1">炭水化物</div>
+                  <div className="font-bold text-sky-600 dark:text-sky-400">{nutrition.carbs}</div>
                 </div>
-                <div className="bg-zinc-950/50 rounded-xl p-2 border border-white/5">
-                  <div className="text-[10px] text-zinc-500 mb-1">食塩相当</div>
-                  <div className="font-bold text-zinc-300">{nutrition.salt}</div>
+                <div className="bg-gray-50 dark:bg-zinc-950/50 rounded-xl p-2 border border-black/5 dark:border-white/5">
+                  <div className="text-[10px] text-gray-500 dark:text-zinc-500 mb-1">食塩相当</div>
+                  <div className="font-bold text-gray-800 dark:text-zinc-300">{nutrition.salt}</div>
                 </div>
               </div>
               {nutrition.suggestions && (
-                <div className="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 flex gap-2">
-                  <div className="shrink-0 pt-0.5"><Wand2 size={14} className="text-emerald-500" /></div>
-                  <p className="text-xs text-zinc-300 leading-relaxed">{nutrition.suggestions}</p>
+                <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3 flex gap-2">
+                  <div className="shrink-0 pt-0.5"><Wand2 size={14} className="text-emerald-600 dark:text-emerald-500" /></div>
+                  <p className="text-xs text-gray-800 dark:text-zinc-300 leading-relaxed">{nutrition.suggestions}</p>
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-gray-500 dark:text-zinc-500">
               ボタンを押すと、このレシピの材料からAIが自動で栄養素を推定して表示します！
             </p>
           )}
@@ -1160,27 +1161,27 @@ const RecipeDetailScreen = () => {
             <h2 className="text-lg font-bold flex items-center gap-2">
               <Bookmark size={18} className="text-amber-500" /> 材料
             </h2>
-            <div className="flex items-center gap-2 bg-zinc-900 border border-white/10 rounded-full px-2 py-0.5">
+            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded-full px-2 py-0.5 shadow-sm">
               <button 
                 onClick={() => setServings(s => Math.max(1, s - 1))}
-                className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
+                className="w-7 h-7 flex items-center justify-center text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
               ><Minus size={14}/></button>
-              <span className="font-bold text-emerald-400 text-sm w-12 text-center">{servings}{servingsUnit}</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm w-12 text-center">{servings}{servingsUnit}</span>
               <button 
                 onClick={() => setServings(s => s + 1)}
-                className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white"
+                className="w-7 h-7 flex items-center justify-center text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white"
               ><Plus size={14}/></button>
             </div>
           </div>
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {recipe.ingredients.map((ing: string, i: number) => {
               // グループ見出し（■から始まる）の場合
               if (ing.startsWith('■')) {
                 const groupName = ing.replace(/^■\s*/, '');
                 return (
-                  <div key={i} className="mt-2 mb-0.5 first:mt-0 flex items-center gap-2">
+                  <div key={i} className="mt-3 mb-1 first:mt-0 flex items-center gap-2">
                     <div className="w-1 h-3 bg-amber-500 rounded-full"></div>
-                    <span className="text-amber-400 font-bold text-xs tracking-wide">{groupName}</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold text-xs tracking-wide">{groupName}</span>
                   </div>
                 );
               }
@@ -1217,9 +1218,9 @@ const RecipeDetailScreen = () => {
               }
 
               return (
-                <div key={i} className="flex justify-between items-center bg-zinc-900/20 py-0.5 px-2.5 rounded-lg border border-white/5">
-                  <span className="text-zinc-300 font-medium text-[13px]">{name || ing}</span>
-                  {quantity && <span className="text-zinc-400 font-bold ml-auto text-right tracking-wider text-[13px]">{quantity}</span>}
+                <div key={i} className="flex justify-between items-center bg-white dark:bg-zinc-900/20 py-1.5 px-3 rounded-lg border border-black/5 dark:border-white/5 shadow-xs dark:shadow-none">
+                  <span className="text-gray-800 dark:text-zinc-300 font-medium text-[13px]">{name || ing}</span>
+                  {quantity && <span className="text-gray-600 dark:text-zinc-400 font-bold ml-auto text-right tracking-wider text-[13px]">{quantity}</span>}
                 </div>
               );
             })}
@@ -1248,13 +1249,13 @@ const RecipeDetailScreen = () => {
 
               return (
                 <div key={i} className="flex gap-4 mb-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-sm">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-500 flex items-center justify-center font-bold text-sm">
                     {i + 1}
                   </div>
                   <div className="flex-grow pt-1 space-y-3">
-                    <p className="text-zinc-300 leading-relaxed">{cleanText}</p>
+                    <p className="text-gray-800 dark:text-zinc-300 leading-relaxed">{cleanText}</p>
                     {stepImg && (
-                      <div className="rounded-xl overflow-hidden border border-white/5 shadow-lg w-full">
+                      <div className="rounded-xl overflow-hidden border border-black/5 dark:border-white/5 shadow-lg w-full">
                         <img src={stepImg} alt={`Step ${i + 1}`} className="w-full h-auto max-h-[250px] object-cover" />
                       </div>
                     )}
@@ -1752,14 +1753,14 @@ const RecipeEditScreen = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 font-sans leading-snug pb-[100px] relative">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans leading-snug pb-[100px] relative transition-colors duration-300">
       {/* ヘッダー */}
-      <div className="px-5 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-[#09090b]/80 backdrop-blur-xl border-b border-white/5 z-20">
+      <div className="px-5 pt-12 pb-6 flex justify-between items-center sticky top-0 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-black/5 dark:border-white/5 z-20">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 text-zinc-400 hover:text-white transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors">
             <X size={24} />
           </button>
-          <h1 className="text-lg font-bold">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">
             {isEditing ? 'レシピを編集' : '新しいレシピを作る'}
           </h1>
         </div>
@@ -1775,12 +1776,12 @@ const RecipeEditScreen = () => {
       <div className="px-5 mt-4">
         <button
           onClick={() => setIsImportModalOpen(true)}
-          className="w-full relative overflow-hidden rounded-2xl p-[1px] group active:scale-[0.98] transition-all"
+          className="w-full relative overflow-hidden rounded-2xl p-[1px] group active:scale-[0.98] transition-all shadow-sm dark:shadow-none"
         >
           <span className="absolute inset-0 bg-gradient-to-r from-amber-500 to-rose-500 opacity-80 group-hover:opacity-100 transition-opacity"></span>
-          <div className="relative bg-zinc-900/90 backdrop-blur-sm px-4 py-2.5 rounded-2xl flex items-center justify-center gap-2">
-            <Wand2 className="text-amber-400" size={18} />
-            <span className="font-bold text-sm text-zinc-100">サイトのURLやメモからAI自動入力</span>
+          <div className="relative bg-white dark:bg-zinc-900/90 backdrop-blur-sm px-4 py-2.5 rounded-2xl flex items-center justify-center gap-2">
+            <Wand2 className="text-amber-500 dark:text-amber-400" size={18} />
+            <span className="font-bold text-sm text-gray-900 dark:text-zinc-100">サイトのURLやメモからAI自動入力</span>
           </div>
         </button>
       </div>
@@ -1788,7 +1789,7 @@ const RecipeEditScreen = () => {
       <div className="px-5 pt-5 space-y-5">
         {/* 写真アップロード */}
         <div>
-          <label className="cursor-pointer w-full aspect-[4/3] bg-zinc-900/60 border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-zinc-800/60 hover:border-amber-500/30 transition-all text-zinc-500 hover:text-amber-400 group overflow-hidden relative">
+          <label className="cursor-pointer w-full aspect-[4/3] bg-white dark:bg-zinc-900/60 border border-dashed border-gray-300 dark:border-white/10 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-gray-100 dark:hover:bg-zinc-800/60 hover:border-amber-500/30 transition-all text-gray-400 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 group overflow-hidden relative shadow-sm dark:shadow-none">
             <input 
               type="file" 
               accept="image/*" 
@@ -1842,10 +1843,10 @@ const RecipeEditScreen = () => {
                <img src={recipeImage} alt="Recipe" className="absolute inset-0 w-full h-full object-cover" />
             ) : (
                <>
-                 <div className="p-4 bg-zinc-800/80 rounded-full group-hover:bg-amber-500/10 group-hover:scale-110 transition-all duration-300">
+                 <div className="p-4 bg-gray-100 dark:bg-zinc-800/80 rounded-full group-hover:bg-amber-500/10 group-hover:scale-110 transition-all duration-300">
                    <Camera size={32} />
                  </div>
-                 <span className="text-sm font-medium">料理の写真をアップロード</span>
+                 <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">料理の写真をアップロード</span>
                </>
             )}
           </label>
@@ -1854,19 +1855,19 @@ const RecipeEditScreen = () => {
         {/* 基本情報（タイトル、時間など） */}
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Recipe Name / 料理名</label>
+            <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2">Recipe Name / 料理名</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="とろける黒毛和牛のシチュー..."
-              className="w-full bg-zinc-900/40 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 shadow-inner"
+              className="w-full bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner"
             />
           </div>
 
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 truncate">Yield / 出来上がり</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2 truncate">Yield / 出来上がり</label>
               <div className="flex gap-2">
                 <div className="relative flex-grow">
                   <Users size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/80" />
@@ -1875,13 +1876,13 @@ const RecipeEditScreen = () => {
                     value={yieldAmount}
                     onChange={e => setYieldAmount(e.target.value)}
                     placeholder="2"
-                    className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-3 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
+                    className="w-full bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner"
                   />
                 </div>
                 <select
                   value={yieldUnit}
                   onChange={e => setYieldUnit(e.target.value)}
-                  className="bg-zinc-800 border border-white/5 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner min-w-[70px]"
+                  className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-white/5 rounded-xl px-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner min-w-[70px]"
                 >
                   <option value="人分">人分</option>
                   {UNITS.map((u: string) => <option key={u} value={u}>{u}</option>)}
@@ -1892,7 +1893,7 @@ const RecipeEditScreen = () => {
 
           <div className="flex gap-4">
             <div className="flex-1 min-w-0">
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span className="truncate">Calories / 1人分</span>
               </label>
               <div className="relative flex gap-2">
@@ -1903,14 +1904,14 @@ const RecipeEditScreen = () => {
                     value={calories}
                     onChange={e => setCalories(e.target.value)}
                     placeholder="0"
-                    className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
+                    className="w-full bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleAutoCalculateCalories}
                   disabled={isCalculatingCalories}
-                  className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-500 border border-amber-500/30 rounded-xl px-2 flex items-center justify-center transition-colors disabled:opacity-50 shrink-0 text-xs font-bold"
+                  className="bg-amber-500/20 hover:bg-amber-500/40 text-amber-600 dark:text-amber-500 border border-amber-500/30 rounded-xl px-2 flex items-center justify-center transition-colors disabled:opacity-50 shrink-0 text-xs font-bold"
                   title="AIでカロリー自動計算"
                 >
                   {isCalculatingCalories ? <Loader2 size={16} className="animate-spin" /> : <><Wand2 size={14} className="mr-1" /> AI</>}
@@ -1918,15 +1919,15 @@ const RecipeEditScreen = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 truncate">Time (m)</label>
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2 truncate">Time (m)</label>
               <div className="relative">
-                <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500" />
                 <input
                   type="number"
                   value={cookingTime}
                   onChange={e => setCookingTime(e.target.value)}
                   placeholder="15"
-                  className="w-full bg-zinc-900/40 border border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 shadow-inner"
+                  className="w-full bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl pl-11 pr-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner"
                 />
               </div>
             </div>
@@ -1937,12 +1938,12 @@ const RecipeEditScreen = () => {
         <div className="grid grid-cols-2 gap-4 pt-2">
           {/* Level選択 */}
           <div className="col-span-2 sm:col-span-1">
-             <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Level / 難易度</label>
+             <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider mb-2 block">Level / 難易度</label>
              <div className="relative">
                <select
                  value={level}
                  onChange={e => setLevel(e.target.value)}
-                 className="w-full bg-zinc-900/40 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500/30 shadow-inner appearance-none relative z-10"
+                 className="w-full bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-amber-500/30 shadow-sm dark:shadow-inner appearance-none relative z-10"
                >
                  <option value="Novice">Novice / 初心者</option>
                  <option value="Chef">Chef / 中級者</option>
@@ -2327,8 +2328,8 @@ const LoginScreen = () => {
   };
 
   return (
-      <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 font-sans leading-snug pb-[120px] px-8 relative">
-        <button onClick={() => navigate(-1)} className="absolute top-16 left-6 p-2 rounded-full text-zinc-400 hover:text-white bg-zinc-800/50 backdrop-blur-md transition-colors">
+      <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans leading-snug pb-[120px] px-8 relative transition-colors duration-300">
+        <button onClick={() => navigate(-1)} className="absolute top-16 left-6 p-2 rounded-full text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white bg-white/80 dark:bg-zinc-800/50 backdrop-blur-md transition-colors border border-black/5 dark:border-transparent">
           <ArrowLeft size={20} />
         </button>
 
@@ -2336,35 +2337,35 @@ const LoginScreen = () => {
           <div className="w-20 h-20 bg-gradient-to-tr from-amber-500 to-rose-500 rounded-3xl flex items-center justify-center shadow-2xl mb-4">
              <KeyRound size={40} className="text-white drop-shadow-md" />
           </div>
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-rose-400">
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-rose-500 dark:from-amber-400 dark:to-rose-400">
             {isLogin ? 'おかえりなさい' : 'アカウント作成'}
           </h1>
-          <p className="text-zinc-500 mt-2 text-sm">
+          <p className="text-gray-500 dark:text-zinc-500 mt-2 text-sm">
             {isLogin ? 'アカウントにログインしてレシピを管理' : '新しいシェフとして参加しましょう'}
           </p>
         </div>
 
         <form onSubmit={handleAuth} className="space-y-3 mt-4">
           <div>
-            <label className="block text-sm font-bold text-zinc-300 mb-2">メールアドレス</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">メールアドレス</label>
             <input 
               type="email" 
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="example@example.com"
-              className="w-full bg-zinc-900/60 border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-amber-500/50 transition-colors placeholder-zinc-600"
+              className="w-full bg-white dark:bg-zinc-900/60 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-amber-500/50 transition-colors placeholder-gray-400 dark:placeholder-zinc-600 shadow-sm dark:shadow-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-zinc-300 mb-2">パスワード</label>
+            <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">パスワード</label>
             <input 
               type="password" 
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="6文字以上のパスワード"
-              className="w-full bg-zinc-900/60 border border-white/10 rounded-xl px-4 py-4 text-white font-medium focus:outline-none focus:border-amber-500/50 transition-colors placeholder-zinc-600"
+              className="w-full bg-white dark:bg-zinc-900/60 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-amber-500/50 transition-colors placeholder-gray-400 dark:placeholder-zinc-600 shadow-sm dark:shadow-none"
             />
           </div>
 
@@ -2381,7 +2382,7 @@ const LoginScreen = () => {
 
         <button 
           onClick={() => { setIsLogin(!isLogin); setErrorMsg(''); }} 
-          className="mt-8 text-sm text-zinc-400 font-medium hover:text-amber-400 transition-colors w-full text-center p-3 rounded-xl hover:bg-zinc-900"
+          className="mt-8 text-sm text-gray-500 dark:text-zinc-400 font-medium hover:text-amber-600 dark:hover:text-amber-400 transition-colors w-full text-center p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900"
         >
           {isLogin ? 'アカウントをお持ちでない場合はこちらから登録' : '既にアカウントをお持ちの場合はこちらからログイン'}
         </button>
@@ -2416,11 +2417,11 @@ const ProfileMenuScreen = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 font-sans leading-snug pb-[120px] relative px-5">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans leading-snug pb-[120px] relative px-5 transition-colors duration-300">
       {/* Header Profile Info */}
-      <div className="pt-20 pb-8 border-b border-white/5">
+      <div className="pt-20 pb-8 border-b border-black/5 dark:border-white/5">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center border-2 border-amber-500/50 shadow-lg shadow-amber-900/20 overflow-hidden">
+          <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center border-2 border-amber-500/50 shadow-lg shadow-amber-900/10 dark:shadow-amber-900/20 overflow-hidden">
              {session?.user?.user_metadata?.avatar_url ? (
                <img src={session.user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
              ) : (
@@ -2428,10 +2429,10 @@ const ProfileMenuScreen = () => {
              )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400">
+            <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-rose-500 dark:from-amber-400 dark:to-rose-400">
               {session?.user?.user_metadata?.full_name || (session ? session.user.email.split('@')[0] : 'Guest')}
             </h1>
-            <p className="text-xs text-zinc-500 font-medium tracking-wide mt-1">
+            <p className="text-xs text-gray-500 dark:text-zinc-500 font-medium tracking-wide mt-1">
               {session ? session.user.email : '未ログイン / アカウント未設定'}
             </p>
           </div>
@@ -2442,50 +2443,50 @@ const ProfileMenuScreen = () => {
         {/* SignIn or SignOut */}
         {!session ? (
           <button 
-             className="w-full flex items-center justify-between bg-zinc-900/60 border border-white/5 p-4 py-5 rounded-2xl hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-inner cursor-pointer"
+             className="w-full flex items-center justify-between bg-white dark:bg-zinc-900/60 border border-black/5 dark:border-white/5 p-4 py-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-sm dark:shadow-inner cursor-pointer"
              onClick={() => navigate('/login')}
           >
              <div className="flex items-center gap-4">
-               <div className="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-500 shadow-sm"><LogIn size={20} /></div>
-               <span className="font-bold text-sm tracking-wide text-zinc-200">サインイン / ログイン</span>
+               <div className="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-500 shadow-sm"><LogIn size={20} /></div>
+               <span className="font-bold text-sm tracking-wide text-gray-800 dark:text-zinc-200">サインイン / ログイン</span>
              </div>
-             <ChevronRight size={18} className="text-zinc-500" />
+             <ChevronRight size={18} className="text-gray-400 dark:text-zinc-500" />
           </button>
         ) : (
           <button 
-             className="w-full flex items-center justify-between bg-zinc-900/60 border border-white/5 p-4 py-5 rounded-2xl hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-inner cursor-pointer"
+             className="w-full flex items-center justify-between bg-white dark:bg-zinc-900/60 border border-black/5 dark:border-white/5 p-4 py-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-sm dark:shadow-inner cursor-pointer"
              onClick={handleLogout}
           >
              <div className="flex items-center gap-4">
-               <div className="p-2.5 bg-rose-500/10 rounded-xl text-rose-500 shadow-sm"><LogOut size={20} /></div>
-               <span className="font-bold text-sm tracking-wide text-zinc-200">ログアウト</span>
+               <div className="p-2.5 bg-rose-500/10 rounded-xl text-rose-600 dark:text-rose-500 shadow-sm"><LogOut size={20} /></div>
+               <span className="font-bold text-sm tracking-wide text-gray-800 dark:text-zinc-200">ログアウト</span>
              </div>
-             <ChevronRight size={18} className="text-zinc-500" />
+             <ChevronRight size={18} className="text-gray-400 dark:text-zinc-500" />
           </button>
         )}
 
         {/* Edit Profile / プロフィール編集 */}
         <button 
-           className="w-full flex items-center justify-between bg-zinc-900/60 border border-white/5 p-4 py-5 rounded-2xl hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-inner cursor-pointer"
+           className="w-full flex items-center justify-between bg-white dark:bg-zinc-900/60 border border-black/5 dark:border-white/5 p-4 py-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-sm dark:shadow-inner cursor-pointer"
            onClick={() => navigate('/profile/edit')}
         >
            <div className="flex items-center gap-4">
-             <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-500 shadow-sm"><UserCircle size={20} /></div>
-             <span className="font-bold text-sm tracking-wide text-zinc-200">プロフィール編集</span>
+             <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 dark:text-amber-500 shadow-sm"><UserCircle size={20} /></div>
+             <span className="font-bold text-sm tracking-wide text-gray-800 dark:text-zinc-200">プロフィール編集</span>
            </div>
-           <ChevronRight size={18} className="text-zinc-500" />
+           <ChevronRight size={18} className="text-gray-400 dark:text-zinc-500" />
         </button>
 
         {/* Settings / 設定 */}
         <button 
-           className="w-full flex items-center justify-between bg-zinc-900/60 border border-white/5 p-4 py-5 rounded-2xl hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-inner cursor-pointer"
+           className="w-full flex items-center justify-between bg-white dark:bg-zinc-900/60 border border-black/5 dark:border-white/5 p-4 py-5 rounded-2xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-sm dark:shadow-inner cursor-pointer"
            onClick={() => navigate('/settings')}
         >
            <div className="flex items-center gap-4">
-             <div className="p-2.5 bg-rose-500/10 rounded-xl text-rose-500 shadow-sm"><Settings size={20} /></div>
-             <span className="font-bold text-sm tracking-wide text-zinc-200">設定</span>
+             <div className="p-2.5 bg-rose-500/10 rounded-xl text-rose-600 dark:text-rose-500 shadow-sm"><Settings size={20} /></div>
+             <span className="font-bold text-sm tracking-wide text-gray-800 dark:text-zinc-200">設定</span>
            </div>
-           <ChevronRight size={18} className="text-zinc-500" />
+           <ChevronRight size={18} className="text-gray-400 dark:text-zinc-500" />
         </button>
       </div>
     </div>
@@ -2552,69 +2553,69 @@ const ProfileEditScreen = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#09090b] text-zinc-100 font-sans leading-snug pb-[120px] relative">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 font-sans leading-snug pb-[120px] relative transition-colors duration-300">
       {/* Header */}
-      <div className="px-5 pt-12 pb-6 border-b border-white/5 bg-[#09090b]/80 backdrop-blur-xl sticky top-0 z-20 flex flex-col">
+      <div className="px-5 pt-12 pb-6 border-b border-black/5 dark:border-white/5 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl sticky top-0 z-20 flex flex-col">
         <div className="flex items-center gap-3 mb-1">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-zinc-400 hover:text-white transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors">
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-400">
+          <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-rose-500 dark:from-amber-400 dark:to-rose-400">
             プロフィール編集
           </h1>
         </div>
-        <p className="text-xs text-zinc-400 mt-1 pl-11">表示名やアカウント情報を変更できます。</p>
+        <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1 pl-11">表示名やアカウント情報を変更できます。</p>
       </div>
 
       <div className="px-5 pt-5 space-y-7">
         <div className="flex flex-col items-center mb-4">
-           <div className="w-24 h-24 rounded-full bg-zinc-800 border-2 border-amber-500 overflow-hidden flex items-center justify-center shadow-lg">
+           <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-zinc-800 border-2 border-amber-500 overflow-hidden flex items-center justify-center shadow-lg">
              {avatarBase64 ? (
                <img src={avatarBase64} alt="Avatar" className="w-full h-full object-cover" />
              ) : (
-               <UserCircle size={40} className="text-zinc-500" />
+               <UserCircle size={40} className="text-gray-400 dark:text-zinc-500" />
              )}
            </div>
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-zinc-300 mb-2">
-            表示名 <span className="text-zinc-500 font-normal text-xs ml-1">（例：●● ●●）</span>
+          <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
+            表示名 <span className="text-gray-400 dark:text-zinc-500 font-normal text-xs ml-1">（例：●● ●●）</span>
           </label>
           <input 
             type="text" 
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="●● ●●"
-            className="w-full bg-zinc-900/60 border border-white/10 rounded-xl px-4 py-2.5 text-white font-medium focus:outline-none focus:border-amber-500/50 shadow-inner transition-colors placeholder-zinc-600"
+            className="w-full bg-white dark:bg-zinc-900/60 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner transition-colors placeholder-gray-400 dark:placeholder-zinc-600"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-zinc-300 mb-2">
-            メールアドレス <span className="text-zinc-500 font-normal text-xs ml-1">（読み取り専用）</span>
+          <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">
+            メールアドレス <span className="text-gray-400 dark:text-zinc-500 font-normal text-xs ml-1">（読み取り専用）</span>
           </label>
           <input 
             type="email" 
             value={email}
             disabled
-            className="w-full bg-zinc-900/30 border border-white/5 rounded-xl px-4 py-2.5 text-zinc-400 font-medium cursor-not-allowed shadow-inner transition-colors"
+            className="w-full bg-gray-100 dark:bg-zinc-900/30 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-gray-500 dark:text-zinc-400 font-medium cursor-not-allowed shadow-inner transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-zinc-300 mb-2">パスワード</label>
+          <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">パスワード</label>
           <div className="relative">
             <input 
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="変更する場合のみ入力"
-              className="w-full bg-zinc-900/60 border border-white/10 rounded-xl pl-4 pr-16 py-2.5 text-white font-medium focus:outline-none focus:border-amber-500/50 shadow-inner transition-colors placeholder-zinc-600"
+              className="w-full bg-white dark:bg-zinc-900/60 border border-gray-200 dark:border-white/10 rounded-xl pl-4 pr-16 py-2.5 text-gray-900 dark:text-white font-medium focus:outline-none focus:border-amber-500/50 shadow-sm dark:shadow-inner transition-colors placeholder-gray-400 dark:placeholder-zinc-600"
             />
             <button 
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-500/80 hover:text-amber-400 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600 dark:text-amber-500/80 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
             >
               {showPassword ? "隠す" : "表示"}
             </button>
@@ -2622,9 +2623,9 @@ const ProfileEditScreen = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-zinc-300 mb-2">アイコン画像</label>
-          <div className="flex items-center gap-3 bg-zinc-900/40 border border-white/5 rounded-xl p-1.5 shadow-inner">
-            <label className="bg-zinc-800 hover:bg-zinc-700 text-amber-400 text-xs font-bold px-4 py-3 rounded-lg cursor-pointer transition-colors shadow-sm">
+          <label className="block text-sm font-bold text-gray-700 dark:text-zinc-300 mb-2">アイコン画像</label>
+          <div className="flex items-center gap-3 bg-white dark:bg-zinc-900/40 border border-gray-200 dark:border-white/5 rounded-xl p-1.5 shadow-sm dark:shadow-inner">
+            <label className="bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-amber-600 dark:text-amber-400 text-xs font-bold px-4 py-3 rounded-lg cursor-pointer transition-colors shadow-sm">
               ファイルを選択
               <input 
                 type="file" 
@@ -2633,7 +2634,7 @@ const ProfileEditScreen = () => {
                 onChange={handleFileChange}
               />
             </label>
-            <span className="text-xs text-zinc-500 font-medium truncate pr-2">
+            <span className="text-xs text-gray-500 dark:text-zinc-500 font-medium truncate pr-2">
               {selectedFile ? selectedFile.name : "ファイル未選択"}
             </span>
           </div>
@@ -2641,7 +2642,7 @@ const ProfileEditScreen = () => {
       </div>
 
       <div className="px-5 mt-10 flex gap-4">
-        <button onClick={() => navigate(-1)} className="flex-1 bg-zinc-800/80 hover:bg-zinc-700 border border-white/5 text-zinc-300 font-bold py-2.5 rounded-xl transition-all active:scale-95 text-sm">
+        <button onClick={() => navigate(-1)} className="flex-1 bg-gray-200 dark:bg-zinc-800/80 hover:bg-gray-300 dark:hover:bg-zinc-700 border border-black/5 dark:border-white/5 text-gray-700 dark:text-zinc-300 font-bold py-2.5 rounded-xl transition-all active:scale-95 text-sm">
           キャンセル
         </button>
         <button 
@@ -2662,7 +2663,7 @@ const ProfileEditScreen = () => {
 // -------------------------------------------------------------
 const SettingsScreen = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { theme, setTheme } = useTheme();
   
   const [ingredients, setIngredients] = useState(() => getSettings('ingredients', DEFAULT_INGREDIENTS));
   const [genres, setGenres] = useState(() => getSettings('genres', DEFAULT_GENRES));
@@ -2745,7 +2746,6 @@ const SettingsScreen = () => {
               {theme === 'light' && <div className="w-3 h-3 rounded-full bg-amber-500"></div>}
             </button>
           </div>
-          {theme === 'light' && <p className="text-xs text-rose-500 mt-2 font-bold px-1 animate-pulse">※システム全体はダークモード専用設計のため、他画面のライト対応は今後のアップデートとなります。</p>}
         </div>
 
         {/* Customized Data */}
@@ -2938,17 +2938,17 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-6 w-full max-w-md px-6 z-50">
-      <nav className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl overflow-hidden">
+      <nav className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-full shadow-2xl overflow-hidden transition-colors">
         <div className="flex justify-between items-center px-2 py-1.5 relative">
-          <Link to="/" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/') ? 'text-amber-400' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          <Link to="/" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300'}`}>
             <Compass size={22} className={`mb-1 transition-transform duration-300 ${isActive('/') ? 'scale-110' : ''}`} />
             <span className="text-[9px] font-bold tracking-wider uppercase">Explore</span>
           </Link>
-          <Link to="/recipes" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/recipes') ? 'text-amber-400' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          <Link to="/recipes" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/recipes') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300'}`}>
             <BookOpen size={22} className={`mb-1 transition-transform duration-300 ${isActive('/recipes') ? 'scale-110' : ''}`} />
             <span className="text-[9px] font-bold tracking-wider uppercase">Recipes</span>
           </Link>
-          <Link to="/profile" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/profile') ? 'text-amber-400' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          <Link to="/profile" className={`relative z-10 flex flex-col items-center justify-center w-1/3 py-2 transition-colors duration-300 ${isActive('/profile') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-zinc-500 hover:text-gray-700 dark:hover:text-zinc-300'}`}>
             <UserCircle size={22} className={`mb-1 transition-transform duration-300 ${isActive('/profile') ? 'scale-110' : ''}`} />
             <span className="text-[9px] font-bold tracking-wider uppercase">Profile</span>
           </Link>
@@ -2962,7 +2962,7 @@ function App() {
   return (
     <BrowserRouter>
       {/* スマホ画面サイズに合わせたコンテナ */}
-      <div className="w-full max-w-md mx-auto min-h-screen relative shadow-2xl overflow-hidden bg-[#09090b]">
+      <div className="w-full max-w-md mx-auto min-h-screen relative shadow-2xl overflow-hidden bg-gray-50 dark:bg-[#09090b] text-gray-900 dark:text-zinc-100 transition-colors duration-300">
         <Routes>
           <Route path="/" element={<SearchScreen />} />
           <Route path="/recipes" element={<RecipeListScreen />} />
